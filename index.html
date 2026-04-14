@@ -1,22 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Awesome Site</title>
+  <title>NeonVault • Account</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); }
+    .neon-glow { box-shadow: 0 0 25px rgba(59, 130, 246, 0.5); }
   </style>
 </head>
-<body>
-  <h1>Welcome to My Site</h1>
-  <div id="user-info"></div>
-  <button id="logout-btn" style="display:none;">Logout</button>
+<body class="bg-gradient-to-br from-zinc-950 via-blue-950 to-zinc-950 text-white min-h-screen">
+
+  <div id="app" class="max-w-md mx-auto pt-12 px-6">
+    <!-- Auth Screen -->
+    <div id="auth-screen">
+      <div class="text-center mb-10">
+        <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          NeonVault
+        </h1>
+        <p class="text-zinc-400 mt-2">Secure. Beautiful. Yours.</p>
+      </div>
+
+      <div class="glass rounded-3xl p-8 border border-white/10 neon-glow">
+        <div class="flex border-b border-white/10 mb-6">
+          <button onclick="switchTab(0)" id="tab-login" 
+            class="flex-1 py-3 text-lg font-medium border-b-2 border-blue-500 text-white">Login</button>
+          <button onclick="switchTab(1)" id="tab-signup"
+            class="flex-1 py-3 text-lg font-medium text-zinc-400">Sign Up</button>
+        </div>
+
+        <div id="form-area">
+          <input id="email" type="email" placeholder="you@email.com"
+            class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-4 text-lg">
+
+          <input id="password" type="password" placeholder="••••••••"
+            class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-6 text-lg">
+
+          <button onclick="handleAuth()" id="auth-btn"
+            class="w-full bg-blue-600 hover:bg-blue-700 transition-all font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
+            <span id="btn-text">Login</span>
+            <i id="btn-spinner" class="hidden fas fa-spinner fa-spin"></i>
+          </button>
+
+          <p id="message" class="text-center mt-6 text-sm min-h-[1.25rem]"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h2 class="text-3xl font-bold">Welcome back 👋</h2>
+          <p id="user-email" class="text-zinc-400"></p>
+        </div>
+        <button onclick="logout()" 
+          class="px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl flex items-center gap-2 transition">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+
+      <!-- Todo / Notes Section -->
+      <div class="glass rounded-3xl p-8 border border-white/10">
+        <h3 class="font-semibold text-xl mb-4 flex items-center gap-2">
+          <i class="fas fa-list-check"></i> Your Notes
+        </h3>
+
+        <div class="flex gap-2 mb-6">
+          <input id="new-note" placeholder="Write something..." 
+            class="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 focus:outline-none">
+          <button onclick="addNote()" 
+            class="bg-emerald-600 hover:bg-emerald-700 px-6 rounded-2xl font-medium">Add</button>
+        </div>
+
+        <div id="notes-list" class="space-y-3 max-h-96 overflow-y-auto">
+          <!-- Notes appear here dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
-    // Your Firebase config here
-    const firebaseConfig = {
+    // ================== FIREBASE CONFIG ==================
+   const firebaseConfig = {
   apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
   authDomain: "webtest-4943a.firebaseapp.com",
   projectId: "webtest-4943a",
@@ -26,28 +96,149 @@
   measurementId: "G-9MNX5MX0Z2"
 };
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const userInfo = document.getElementById('user-info');
-    const logoutBtn = document.getElementById('logout-btn');
+    let currentUser = null;
+    let notesUnsubscribe = null;
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userInfo.innerHTML = `<p>Logged in as: <strong>${user.email}</strong></p>`;
-        logoutBtn.style.display = 'inline-block';
+    // Tab switching
+    function switchTab(tab) {
+      const loginTab = document.getElementById('tab-login');
+      const signupTab = document.getElementById('tab-signup');
+      const btnText = document.getElementById('btn-text');
+
+      if (tab === 0) {
+        loginTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        signupTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        btnText.textContent = 'Login';
       } else {
-        window.location.href = 'login.html'; // redirect to login if not logged in
+        signupTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        loginTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        btnText.textContent = 'Create Account';
+      }
+      document.getElementById('message').textContent = '';
+    }
+
+    // Handle Login / Signup
+    async function handleAuth() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const messageEl = document.getElementById('message');
+      const btn = document.getElementById('auth-btn');
+      const spinner = document.getElementById('btn-spinner');
+
+      if (!email || !password) {
+        messageEl.textContent = "Please fill in all fields";
+        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      try {
+        const isLogin = document.getElementById('tab-login').classList.contains('border-b-2');
+        
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        messageEl.textContent = err.message.replace('Firebase: ', '');
+        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    }
+
+    function logout() {
+      signOut(auth);
+    }
+
+    // Add a note to Firestore
+    async function addNote() {
+      const input = document.getElementById('new-note');
+      const text = input.value.trim();
+      if (!text || !currentUser) return;
+
+      try {
+        await addDoc(collection(db, "notes"), {
+          userId: currentUser.uid,
+          text: text,
+          createdAt: serverTimestamp()
+        });
+        input.value = '';
+      } catch (e) {
+        console.error("Error adding note:", e);
+      }
+    }
+
+    // Real-time notes listener
+    function loadNotes(user) {
+      if (notesUnsubscribe) notesUnsubscribe();
+
+      const q = query(
+        collection(db, "notes"),
+        orderBy("createdAt", "desc")
+      );
+
+      notesUnsubscribe = onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('notes-list');
+        container.innerHTML = '';
+
+        snapshot.forEach(doc => {
+          const note = doc.data();
+          if (note.userId !== user.uid) return;
+
+          const div = document.createElement('div');
+          div.className = "bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-start group";
+          div.innerHTML = `
+            <p class="text-zinc-200">${note.text}</p>
+            <button onclick="this.parentElement.remove()" class="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+
+        if (container.children.length === 0) {
+          container.innerHTML = `<p class="text-zinc-500 text-center py-8">No notes yet. Add one above!</p>`;
+        }
+      });
+    }
+
+    // Auth state listener
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      const authScreen = document.getElementById('auth-screen');
+      const dashboard = document.getElementById('dashboard');
+
+      if (user) {
+        authScreen.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        document.getElementById('user-email').textContent = user.email;
+        loadNotes(user);
+      } else {
+        authScreen.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        if (notesUnsubscribe) notesUnsubscribe();
       }
     });
 
-    logoutBtn.addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = 'login.html';
-      });
+    // Allow Enter key on inputs
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const visibleScreen = document.getElementById('auth-screen').classList.contains('hidden') ? false : true;
+        if (visibleScreen) handleAuth();
+      }
     });
   </script>
 </body>
