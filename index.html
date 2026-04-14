@@ -9,13 +9,13 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
-    .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); }
-    .neon-glow { box-shadow: 0 0 25px rgba(59, 130, 246, 0.5); }
+    .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(16px); }
+    .neon-glow { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
   </style>
 </head>
 <body class="bg-gradient-to-br from-zinc-950 via-blue-950 to-zinc-950 text-white min-h-screen">
 
-  <div id="app" class="max-w-md mx-auto pt-12 px-6">
+  <div class="max-w-md mx-auto pt-12 px-6">
     <!-- Auth Screen -->
     <div id="auth-screen">
       <div class="text-center mb-10">
@@ -26,6 +26,20 @@
       </div>
 
       <div class="glass rounded-3xl p-8 border border-white/10 neon-glow">
+        <!-- Google Button -->
+        <button onclick="signInWithGoogle()" 
+          class="w-full bg-white text-black font-semibold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-100 transition-all mb-6 text-lg">
+          <i class="fab fa-google text-xl"></i>
+          Continue with Google
+        </button>
+
+        <div class="flex items-center gap-4 my-6">
+          <div class="flex-1 h-px bg-white/10"></div>
+          <span class="text-zinc-500 text-sm font-medium">OR</span>
+          <div class="flex-1 h-px bg-white/10"></div>
+        </div>
+
+        <!-- Email Tabs -->
         <div class="flex border-b border-white/10 mb-6">
           <button onclick="switchTab(0)" id="tab-login" 
             class="flex-1 py-3 text-lg font-medium border-b-2 border-blue-500 text-white">Login</button>
@@ -33,14 +47,14 @@
             class="flex-1 py-3 text-lg font-medium text-zinc-400">Sign Up</button>
         </div>
 
-        <div id="form-area">
+        <div>
           <input id="email" type="email" placeholder="you@email.com"
             class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-4 text-lg">
 
           <input id="password" type="password" placeholder="••••••••"
             class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-6 text-lg">
 
-          <button onclick="handleAuth()" id="auth-btn"
+          <button onclick="handleEmailAuth()" id="auth-btn"
             class="w-full bg-blue-600 hover:bg-blue-700 transition-all font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
             <span id="btn-text">Login</span>
             <i id="btn-spinner" class="hidden fas fa-spinner fa-spin"></i>
@@ -56,138 +70,263 @@
       <div class="flex justify-between items-center mb-8">
         <div>
           <h2 class="text-3xl font-bold">Welcome back 👋</h2>
-          <p id="user-email" class="text-zinc-400"></p>
+          <p id="user-email" class="text-zinc-400 mt-1"></p>
         </div>
         <button onclick="logout()" 
-          class="px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl flex items-center gap-2 transition">
+          class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl flex items-center gap-2 transition-all font-medium">
           <i class="fas fa-sign-out-alt"></i> Logout
         </button>
       </div>
 
-      <!-- Todo / Notes Section -->
       <div class="glass rounded-3xl p-8 border border-white/10">
-        <h3 class="font-semibold text-xl mb-4 flex items-center gap-2">
+        <h3 class="font-semibold text-xl mb-5 flex items-center gap-2">
           <i class="fas fa-list-check"></i> Your Notes
         </h3>
 
-        <div class="flex gap-2 mb-6">
-          <input id="new-note" placeholder="Write something..." 
-            class="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 focus:outline-none">
+        <div class="flex gap-3 mb-6">
+          <input id="new-note" placeholder="Write a new note..." 
+            class="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500 text-base">
           <button onclick="addNote()" 
-            class="bg-emerald-600 hover:bg-emerald-700 px-6 rounded-2xl font-medium">Add</button>
+            class="bg-emerald-600 hover:bg-emerald-700 px-8 rounded-2xl font-semibold transition-all">
+            Add
+          </button>
         </div>
 
-        <div id="notes-list" class="space-y-3 max-h-96 overflow-y-auto">
-          <!-- Notes appear here dynamically -->
+        <div id="notes-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-2">
+          <!-- Notes will be loaded here -->
         </div>
       </div>
     </div>
   </div>
 
   <script type="module">
-    // ================== FIREBASE CONFIG ==================
-   const firebaseConfig = {
-  apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
-  authDomain: "webtest-4943a.firebaseapp.com",
-  projectId: "webtest-4943a",
-  storageBucket: "webtest-4943a.firebasestorage.app",
-  messagingSenderId: "84924124626",
-  appId: "1:84924124626:web:73098a19326ed1a4ec8c0b",
-  measurementId: "G-9MNX5MX0Z2"
-};
+    // ================== YOUR FIREBASE CONFIG ==================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
+      authDomain: "webtest-4943a.firebaseapp.com",
+      projectId: "webtest-4943a",
+      storageBucket: "webtest-4943a.firebasestorage.app",
+      messagingSenderId: "84924124626",
+      appId: "1:84924124626:web:73098a19326ed1a4ec8c0b",
+      measurementId: "G-9MNX5MX0Z2"
+    };
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+    
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      deleteDoc, 
+      doc,
+      onSnapshot, 
+      query, 
+      orderBy, 
+      serverTimestamp,
+      enableIndexedDbPersistence 
+    } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  // Enable offline persistence (makes notes work better when offline or across tabs)
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.warn("Offline persistence failed - multiple tabs open?");
-    } else if (err.code === 'unimplemented') {
-      console.warn("Browser doesn't support offline persistence");
-    }
-  });
+    // Enable offline persistence
+    enableIndexedDbPersistence(db).catch((err) => {
+      console.warn("Offline persistence issue:", err.code);
+    });
 
-  let currentUser = null;
-  let notesUnsubscribe = null;
+    let currentUser = null;
+    let notesUnsubscribe = null;
 
-  // ... (keep all your existing functions: switchTab, handleAuth, logout, addNote, loadNotes)
+    // ====================== GOOGLE SIGN IN ======================
+    window.signInWithGoogle = async function() {
+      const provider = new GoogleAuthProvider();
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = '';
 
-  function loadNotes(user) {
-    if (notesUnsubscribe) notesUnsubscribe();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error(error);
+        messageEl.textContent = error.message.includes("popup") 
+          ? "Popup was blocked or closed. Please try again." 
+          : error.message.replace('Firebase: ', '');
+        messageEl.className = "text-red-400 text-center mt-4 text-sm";
+      }
+    };
 
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+    // ====================== EMAIL AUTH ======================
+    window.handleEmailAuth = async function() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const messageEl = document.getElementById('message');
+      const btn = document.getElementById('auth-btn');
+      const spinner = document.getElementById('btn-spinner');
+      const btnText = document.getElementById('btn-text');
 
-    notesUnsubscribe = onSnapshot(q, (snapshot) => {
-      const container = document.getElementById('notes-list');
-      container.innerHTML = '';
+      if (!email || !password) {
+        messageEl.textContent = "Please fill in all fields";
+        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+        return;
+      }
 
-      let hasNotes = false;
-      snapshot.forEach(doc => {
-        const note = doc.data();
-        if (note.userId !== user.uid) return;
-        hasNotes = true;
+      btn.disabled = true;
+      spinner.classList.remove('hidden');
+      btnText.textContent = 'Working...';
+      messageEl.textContent = '';
 
-        const div = document.createElement('div');
-        div.className = "bg-white/5 border border-white/10 rounded-2xl p-4 flex justify-between items-start group hover:border-blue-500/30 transition";
-        div.innerHTML = `
-          <p class="text-zinc-200 flex-1">${note.text}</p>
-          <button onclick="deleteNote('${doc.id}')" 
-            class="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition px-2">
-            <i class="fas fa-trash"></i>
-          </button>
-        `;
-        container.appendChild(div);
+      try {
+        const isLogin = document.getElementById('tab-login').classList.contains('border-b-2');
+        
+        if (isLogin) {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        messageEl.textContent = err.message.replace('Firebase: ', '');
+        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('hidden');
+        btnText.textContent = document.getElementById('tab-login').classList.contains('border-b-2') ? 'Login' : 'Create Account';
+      }
+    };
+
+    window.switchTab = function(tab) {
+      const loginTab = document.getElementById('tab-login');
+      const signupTab = document.getElementById('tab-signup');
+      const btnText = document.getElementById('btn-text');
+
+      if (tab === 0) {
+        loginTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        signupTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        btnText.textContent = 'Login';
+      } else {
+        signupTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        loginTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        btnText.textContent = 'Create Account';
+      }
+      document.getElementById('message').textContent = '';
+    };
+
+    window.logout = function() {
+      signOut(auth).catch(console.error);
+    };
+
+    // ====================== NOTES ======================
+    window.addNote = async function() {
+      const input = document.getElementById('new-note');
+      const text = input.value.trim();
+      
+      if (!text || !currentUser) return;
+
+      try {
+        await addDoc(collection(db, "notes"), {
+          userId: currentUser.uid,
+          text: text,
+          createdAt: serverTimestamp()
+        });
+        input.value = '';
+      } catch (e) {
+        console.error("Error adding note:", e);
+        alert("Failed to save note. Please check your connection.");
+      }
+    };
+
+    window.deleteNote = async function(noteId) {
+      if (!confirm("Delete this note?")) return;
+      
+      try {
+        await deleteDoc(doc(db, "notes", noteId));
+      } catch (e) {
+        console.error("Error deleting note:", e);
+        alert("Failed to delete note.");
+      }
+    };
+
+    function loadNotes(user) {
+      if (notesUnsubscribe) notesUnsubscribe();
+
+      const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+
+      notesUnsubscribe = onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('notes-list');
+        container.innerHTML = '';
+
+        let hasNotes = false;
+
+        snapshot.forEach((docSnapshot) => {
+          const note = docSnapshot.data();
+          if (note.userId !== user.uid) return;
+          hasNotes = true;
+
+          const div = document.createElement('div');
+          div.className = "bg-white/5 border border-white/10 rounded-2xl p-5 flex justify-between items-start group hover:border-blue-400/50 transition-all";
+          div.innerHTML = `
+            <p class="text-zinc-200 flex-1 pr-4">${note.text}</p>
+            <button onclick="deleteNote('${docSnapshot.id}')" 
+              class="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+
+        if (!hasNotes) {
+          container.innerHTML = `
+            <p class="text-zinc-500 text-center py-12">
+              No notes yet.<br>
+              <span class="text-sm">Add one above to get started ✨</span>
+            </p>`;
+        }
       });
+    }
 
-      if (!hasNotes) {
-        container.innerHTML = `<p class="text-zinc-500 text-center py-8">No notes yet.<br>Add one above! ✨</p>`;
+    // ====================== AUTH STATE LISTENER ======================
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      const authScreen = document.getElementById('auth-screen');
+      const dashboard = document.getElementById('dashboard');
+
+      if (user) {
+        authScreen.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+        
+        const displayEmail = user.email || (user.displayName ? user.displayName + " (Google)" : "User");
+        document.getElementById('user-email').textContent = displayEmail;
+        
+        loadNotes(user);
+      } else {
+        authScreen.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+        if (notesUnsubscribe) {
+          notesUnsubscribe();
+          notesUnsubscribe = null;
+        }
       }
     });
-  }
 
-  // New: Delete note function
-  window.deleteNote = async function(noteId) {
-    if (!currentUser) return;
-    // For simplicity we're skipping deleteDoc import - you can add it later if wanted
-    // For now, this just removes from UI (real delete needs more code)
-    alert("Delete not fully implemented yet - coming in next upgrade!");
-  };
-
-  // Auth state listener (unchanged except variable name)
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    const authScreen = document.getElementById('auth-screen');
-    const dashboard = document.getElementById('dashboard');
-
-    if (user) {
-      authScreen.classList.add('hidden');
-      dashboard.classList.remove('hidden');
-      document.getElementById('user-email').textContent = user.email;
-      loadNotes(user);
-    } else {
-      authScreen.classList.remove('hidden');
-      dashboard.classList.add('hidden');
-      if (notesUnsubscribe) notesUnsubscribe();
-    }
-  });
-
-  // Enter key support
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      if (!document.getElementById('auth-screen').classList.contains('hidden')) {
-        handleAuth();
-      } else {
-        const input = document.getElementById('new-note');
-        if (document.activeElement === input) addNote();
+    // Enter key support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (!document.getElementById('auth-screen').classList.contains('hidden')) {
+          handleEmailAuth();
+        } else {
+          const input = document.getElementById('new-note');
+          if (document.activeElement === input) addNote();
+        }
       }
-    }
-  });
-</script>
+    });
+  </script>
 </body>
 </html>
