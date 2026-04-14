@@ -10,116 +10,180 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+      background: linear-gradient(135deg, #0a0f1c 0%, #1a2338 100%);
     }
     .glass {
       background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(148, 163, 184, 0.15);
     }
     .note-card {
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .note-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.15);
       border-color: rgb(59 130 246);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
     }
+    .toast {
+      animation: toastIn 0.3s ease, toastOut 0.3s 2.5s ease forwards;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(20px); } }
   </style>
 </head>
 <body class="min-h-screen text-white">
 
-  <div class="max-w-lg mx-auto pt-10 px-6">
-    
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="space-y-8">
-      <div class="text-center">
-        <h1 class="text-5xl font-bold tracking-tight">NeonVault</h1>
-        <p class="text-slate-400 mt-2">Your secure cloud notes</p>
+  <!-- HEADER (only visible when logged in) -->
+  <div id="header" class="hidden fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
+    <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <h1 class="text-3xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">NeonVault</h1>
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <!-- User Avatar -->
+        <div onclick="toggleSettings()" class="flex items-center gap-3 cursor-pointer">
+          <img id="user-avatar" src="https://via.placeholder.com/32" alt="Avatar" 
+               class="w-8 h-8 rounded-2xl object-cover ring-2 ring-blue-500/30">
+          <div>
+            <p id="user-name" class="text-sm font-medium"></p>
+            <p id="user-email-header" class="text-xs text-slate-400"></p>
+          </div>
+        </div>
+
+        <!-- Settings Gear -->
+        <button onclick="toggleSettings()" 
+          class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition">
+          <i class="fas fa-cog text-xl"></i>
+        </button>
+
+        <!-- Logout -->
+        <button onclick="logout()" 
+          class="flex items-center gap-2 px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-sm font-medium transition">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto pt-20 px-6 pb-12">
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen">
+      <div class="max-w-md mx-auto text-center pt-16">
+        <h1 class="text-6xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">NeonVault</h1>
+        <p class="text-slate-400 text-xl">Beautiful notes that live in the cloud</p>
       </div>
 
-      <div class="glass rounded-3xl p-10">
-        <!-- Google Sign In -->
+      <div class="glass rounded-3xl p-10 mt-12 max-w-md mx-auto">
         <button onclick="signInWithGoogle()" 
-          class="w-full bg-white text-black font-semibold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-100 transition text-lg mb-6">
-          <i class="fab fa-google"></i>
+          class="w-full bg-white text-black font-semibold py-5 rounded-3xl flex items-center justify-center gap-4 hover:bg-gray-100 transition text-xl mb-8">
+          <i class="fab fa-google text-2xl"></i>
           Continue with Google
         </button>
 
-        <div class="flex items-center gap-4 my-6">
+        <div class="flex items-center gap-4 my-8">
           <div class="h-px bg-slate-700 flex-1"></div>
-          <span class="text-slate-500 text-sm">OR</span>
+          <span class="text-slate-500 text-sm font-medium">OR</span>
           <div class="h-px bg-slate-700 flex-1"></div>
         </div>
 
-        <!-- Email Tabs -->
         <div class="flex border-b border-slate-700 mb-8">
           <button onclick="switchTab(0)" id="tab-login"
-            class="flex-1 pb-4 text-lg font-medium border-b-2 border-blue-500 text-white">Login</button>
+            class="flex-1 pb-5 text-xl font-medium border-b-2 border-blue-500 text-white">Login</button>
           <button onclick="switchTab(1)" id="tab-signup"
-            class="flex-1 pb-4 text-lg font-medium text-slate-400">Sign Up</button>
+            class="flex-1 pb-5 text-xl font-medium text-slate-400">Sign Up</button>
         </div>
 
-        <input id="email" type="email" placeholder="Email address"
-          class="w-full bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-blue-500 mb-4">
+        <input id="email" type="email" placeholder="you@email.com"
+          class="w-full bg-slate-900 border border-slate-700 rounded-3xl px-7 py-5 text-lg focus:outline-none focus:border-blue-500 mb-5">
 
         <input id="password" type="password" placeholder="Password"
-          class="w-full bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-blue-500 mb-8">
+          class="w-full bg-slate-900 border border-slate-700 rounded-3xl px-7 py-5 text-lg focus:outline-none focus:border-blue-500 mb-8">
 
         <button onclick="handleEmailAuth()" id="auth-btn"
-          class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-2">
+          class="w-full bg-blue-600 hover:bg-blue-700 py-5 rounded-3xl font-semibold text-xl transition flex items-center justify-center gap-3">
           <span id="btn-text">Login</span>
           <i id="btn-spinner" class="hidden fas fa-spinner fa-spin"></i>
         </button>
 
-        <p id="message" class="text-center mt-6 text-red-400 text-sm min-h-[24px]"></p>
+        <p id="message" class="text-center mt-8 text-red-400 min-h-[28px]"></p>
       </div>
     </div>
 
-    <!-- Dashboard -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="hidden">
-      <div class="flex items-center justify-between mb-10">
-        <div>
-          <h2 class="text-4xl font-semibold flex items-center gap-3">
-            Welcome back <span class="text-3xl">👋</span>
-          </h2>
-          <p id="user-email" class="text-slate-400 mt-1 text-lg"></p>
-        </div>
-        <button onclick="logout()" 
-          class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-6 py-3 rounded-2xl transition font-medium">
-          <i class="fas fa-sign-out-alt"></i>
-          Logout
-        </button>
-      </div>
-
-      <!-- Notes Section -->
       <div class="glass rounded-3xl p-8">
-        <h3 class="text-2xl font-semibold mb-6 flex items-center gap-3">
-          <i class="fas fa-sticky-note"></i>
-          Your Notes
-        </h3>
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-3xl font-semibold flex items-center gap-3">
+            <i class="fas fa-sticky-note text-blue-400"></i>
+            Your Notes
+            <span id="note-count" class="text-base font-normal text-slate-400">(0)</span>
+          </h2>
+          <input id="search-input" 
+            onkeyup="filterNotes()" 
+            placeholder="Search notes..." 
+            class="bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-3xl px-6 py-3 w-72 outline-none">
+        </div>
 
         <!-- Add Note -->
-        <div class="flex gap-3 mb-8">
+        <div class="flex gap-3 mb-10">
           <input id="new-note" 
-            placeholder="Write a new note..." 
-            class="flex-1 bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
+            placeholder="Write something amazing..." 
+            class="flex-1 bg-slate-900 border border-slate-700 rounded-3xl px-7 py-5 text-lg focus:outline-none focus:border-emerald-500">
           <button onclick="addNote()" 
-            class="bg-emerald-600 hover:bg-emerald-700 px-10 rounded-2xl font-semibold transition">
+            class="bg-emerald-600 hover:bg-emerald-700 px-10 rounded-3xl font-semibold text-lg transition">
             Add
           </button>
         </div>
 
         <!-- Notes List -->
-        <div id="notes-list" class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
-          <!-- Notes populated by JS -->
+        <div id="notes-list" class="space-y-6 min-h-[400px]">
+          <!-- Populated by JS -->
         </div>
       </div>
     </div>
   </div>
 
+  <!-- SETTINGS MODAL -->
+  <div id="settings-modal" onclick="if(event.target.id === 'settings-modal') toggleSettings()" 
+       class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div onclick="event.stopImmediatePropagation()" 
+         class="glass rounded-3xl w-full max-w-md mx-4 p-8">
+      <h3 class="text-2xl font-semibold mb-8 flex items-center gap-3">
+        <i class="fas fa-cog"></i> Settings
+      </h3>
+      
+      <div class="space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-medium">Confirm before deleting</p>
+            <p class="text-sm text-slate-400">Ask before removing notes</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="confirm-toggle" onchange="saveSettings()" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 transition"></div>
+            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition"></div>
+          </label>
+        </div>
+      </div>
+
+      <button onclick="toggleSettings()" 
+        class="mt-10 w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-3xl text-lg font-medium transition">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="hidden fixed bottom-6 right-6 glass text-white px-6 py-4 rounded-3xl flex items-center gap-3 shadow-2xl">
+    <i id="toast-icon" class="fas fa-check-circle text-emerald-400"></i>
+    <span id="toast-text" class="font-medium"></span>
+  </div>
+
   <script type="module">
-    // ================== FIREBASE CONFIG ==================
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -132,26 +196,13 @@
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
     import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      signInWithPopup,
-      GoogleAuthProvider,
-      onAuthStateChanged, 
-      signOut 
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+      signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut 
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
     
     import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      deleteDoc, 
-      doc,
-      onSnapshot, 
-      query, 
-      orderBy, 
-      serverTimestamp,
-      enableIndexedDbPersistence 
+      getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, 
+      onSnapshot, query, orderBy, serverTimestamp, enableIndexedDbPersistence 
     } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
@@ -162,18 +213,54 @@
 
     let currentUser = null;
     let notesUnsubscribe = null;
+    let allNotes = [];
+    let confirmDelete = false; // default: no confirmation (fast UX)
 
-    // Google Sign In
+    // Load settings from localStorage
+    function loadSettings() {
+      const saved = localStorage.getItem('neonvault_settings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        confirmDelete = settings.confirmDelete || false;
+        document.getElementById('confirm-toggle').checked = confirmDelete;
+      }
+    }
+
+    function saveSettings() {
+      confirmDelete = document.getElementById('confirm-toggle').checked;
+      localStorage.setItem('neonvault_settings', JSON.stringify({ confirmDelete }));
+    }
+
+    function showToast(message, success = true) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      const icon = document.getElementById('toast-icon');
+      
+      text.textContent = message;
+      icon.className = success ? "fas fa-check-circle text-emerald-400" : "fas fa-exclamation-circle text-red-400";
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 2800);
+    }
+
+    // Time ago
+    function timeAgo(ts) {
+      if (!ts) return "just now";
+      const diff = Date.now() - ts.toMillis();
+      const minutes = Math.floor(diff / 60000);
+      if (minutes < 1) return "just now";
+      if (minutes < 60) return `${minutes}m ago`;
+      if (minutes < 1440) return `${Math.floor(minutes/60)}h ago`;
+      return `${Math.floor(minutes/1440)}d ago`;
+    }
+
     window.signInWithGoogle = async () => {
-      const provider = new GoogleAuthProvider();
       try {
-        await signInWithPopup(auth, provider);
+        await signInWithPopup(auth, new GoogleAuthProvider());
       } catch (err) {
         showMessage(err.message.replace('Firebase: ', ''), 'red');
       }
     };
 
-    // Email Auth
     window.handleEmailAuth = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
@@ -182,10 +269,7 @@
       const spinner = document.getElementById('btn-spinner');
       const btnText = document.getElementById('btn-text');
 
-      if (!email || !password) {
-        showMessage("Please fill in all fields", "red");
-        return;
-      }
+      if (!email || !password) return showMessage("Fill all fields", "red");
 
       btn.disabled = true;
       spinner.classList.remove('hidden');
@@ -207,10 +291,10 @@
       }
     };
 
-    function showMessage(text, color = "red") {
+    function showMessage(text, color) {
       const el = document.getElementById('message');
       el.textContent = text;
-      el.className = `text-center mt-6 text-${color}-400 text-sm`;
+      el.className = `text-center mt-8 text-${color}-400`;
     }
 
     window.switchTab = (tab) => {
@@ -232,7 +316,6 @@
 
     window.logout = () => signOut(auth);
 
-    // Add Note
     window.addNote = async () => {
       const input = document.getElementById('new-note');
       const text = input.value.trim();
@@ -242,76 +325,123 @@
         await addDoc(collection(db, "notes"), {
           userId: currentUser.uid,
           text: text,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         });
-        input.value = '';
+        input.value = '';                    // ← AUTO CLEAR
+        showToast("Note added ✨");
       } catch (e) {
-        alert("Failed to save note. Check your connection.");
+        showToast("Failed to add note", false);
       }
     };
 
-    // Delete Note
     window.deleteNote = async (noteId) => {
-      if (!confirm("Delete this note?")) return;
+      if (confirmDelete && !confirm("Delete this note forever?")) return;
+      
       try {
         await deleteDoc(doc(db, "notes", noteId));
+        showToast("Note deleted");
       } catch (e) {
-        alert("Failed to delete note.");
+        showToast("Failed to delete", false);
       }
     };
 
-    // Load Notes
-    function loadNotes(user) {
-      if (notesUnsubscribe) notesUnsubscribe();
-
-      const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
-
-      notesUnsubscribe = onSnapshot(q, (snapshot) => {
-        const container = document.getElementById('notes-list');
-        container.innerHTML = '';
-
-        let count = 0;
-        snapshot.forEach((docSnap) => {
-          const note = docSnap.data();
-          if (note.userId !== user.uid) return;
-          count++;
-
-          const div = document.createElement('div');
-          div.className = "note-card glass rounded-2xl p-5 flex justify-between items-start group";
-          div.innerHTML = `
-            <p class="text-slate-200 text-[17px] leading-relaxed flex-1">${note.text}</p>
-            <button onclick="deleteNote('${docSnap.id}')" 
-              class="text-slate-500 hover:text-red-400 transition opacity-0 group-hover:opacity-100 p-2 -mr-2">
-              <i class="fas fa-trash text-lg"></i>
-            </button>
-          `;
-          container.appendChild(div);
+    window.updateNote = async (noteId, newText) => {
+      if (!newText.trim()) return;
+      try {
+        await updateDoc(doc(db, "notes", noteId), {
+          text: newText.trim(),
+          updatedAt: serverTimestamp()
         });
+      } catch (e) {}
+    };
 
-        if (count === 0) {
-          container.innerHTML = `
-            <div class="text-center py-16 text-slate-400">
-              <p class="text-xl">No notes yet.</p>
-              <p class="mt-2">Add one above to get started ✨</p>
-            </div>`;
-        }
+    function filterNotes() {
+      const term = document.getElementById('search-input').value.toLowerCase().trim();
+      const container = document.getElementById('notes-list');
+      container.innerHTML = '';
+
+      const filtered = allNotes.filter(n => n.text.toLowerCase().includes(term));
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-16 text-slate-400">No notes match your search.</div>`;
+        return;
+      }
+      renderNotes(filtered);
+    }
+
+    function renderNotes(notes) {
+      const container = document.getElementById('notes-list');
+      container.innerHTML = '';
+
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = "note-card glass rounded-3xl p-7 flex flex-col";
+        div.innerHTML = `
+          <div contenteditable="true" spellcheck="false"
+            onblur="updateNote('${note.id}', this.innerText)"
+            class="text-slate-100 text-lg leading-relaxed outline-none min-h-[80px]">${note.text}</div>
+          
+          <div class="flex justify-between items-center mt-6 text-xs text-slate-400">
+            <span>${timeAgo(note.updatedAt || note.createdAt)}</span>
+            <button onclick="deleteNote('${note.id}')" class="hover:text-red-400 transition flex items-center gap-1">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
       });
     }
 
-    // Auth State
+    function loadNotes(user) {
+      if (notesUnsubscribe) notesUnsubscribe();
+
+      const q = query(collection(db, "notes"), orderBy("updatedAt", "desc"));
+
+      notesUnsubscribe = onSnapshot(q, (snapshot) => {
+        allNotes = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.userId === user.uid) allNotes.push({ id: docSnap.id, ...data });
+        });
+
+        document.getElementById('note-count').textContent = `(${allNotes.length})`;
+        renderNotes(allNotes);
+      });
+    }
+
+    function toggleSettings() {
+      const modal = document.getElementById('settings-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    // MAIN AUTH LISTENER
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       const authScreen = document.getElementById('auth-screen');
       const dashboard = document.getElementById('dashboard');
+      const header = document.getElementById('header');
 
       if (user) {
         authScreen.classList.add('hidden');
         dashboard.classList.remove('hidden');
-        document.getElementById('user-email').textContent = user.email || user.displayName || "User";
+        header.classList.remove('hidden');
+
+        // Avatar & name
+        const avatar = document.getElementById('user-avatar');
+        const nameEl = document.getElementById('user-name');
+        const emailEl = document.getElementById('user-email-header');
+
+        avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
+        nameEl.textContent = user.displayName || "User";
+        emailEl.textContent = user.email;
+
+        loadSettings();
         loadNotes(user);
       } else {
         authScreen.classList.remove('hidden');
         dashboard.classList.add('hidden');
+        header.classList.add('hidden');
         if (notesUnsubscribe) notesUnsubscribe();
       }
     });
@@ -319,14 +449,17 @@
     // Keyboard support
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        if (document.getElementById('auth-screen').classList.contains('hidden')) {
+        if (document.getElementById('dashboard').classList.contains('hidden')) {
+          handleEmailAuth();
+        } else {
           const input = document.getElementById('new-note');
           if (document.activeElement === input) addNote();
-        } else {
-          handleEmailAuth();
         }
       }
     });
+
+    // Initial settings load
+    loadSettings();
   </script>
 </body>
 </html>
