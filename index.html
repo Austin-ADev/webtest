@@ -3,104 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeonVault • Account</title>
+  <title>NeonVault</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(16px); }
-    .neon-glow { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .note-card {
+      transition: all 0.2s ease;
+    }
+    .note-card:hover {
+      transform: translateY(-2px);
+      border-color: rgb(59 130 246);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-zinc-950 via-blue-950 to-zinc-950 text-white min-h-screen">
+<body class="min-h-screen text-white">
 
-  <div class="max-w-md mx-auto pt-12 px-6">
+  <div class="max-w-lg mx-auto pt-10 px-6">
+    
     <!-- Auth Screen -->
-    <div id="auth-screen">
-      <div class="text-center mb-10">
-        <h1 class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-          NeonVault
-        </h1>
-        <p class="text-zinc-400 mt-2">Secure. Beautiful. Yours.</p>
+    <div id="auth-screen" class="space-y-8">
+      <div class="text-center">
+        <h1 class="text-5xl font-bold tracking-tight">NeonVault</h1>
+        <p class="text-slate-400 mt-2">Your secure cloud notes</p>
       </div>
 
-      <div class="glass rounded-3xl p-8 border border-white/10 neon-glow">
-        <!-- Google Button -->
+      <div class="glass rounded-3xl p-10">
+        <!-- Google Sign In -->
         <button onclick="signInWithGoogle()" 
-          class="w-full bg-white text-black font-semibold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-100 transition-all mb-6 text-lg">
-          <i class="fab fa-google text-xl"></i>
+          class="w-full bg-white text-black font-semibold py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-100 transition text-lg mb-6">
+          <i class="fab fa-google"></i>
           Continue with Google
         </button>
 
         <div class="flex items-center gap-4 my-6">
-          <div class="flex-1 h-px bg-white/10"></div>
-          <span class="text-zinc-500 text-sm font-medium">OR</span>
-          <div class="flex-1 h-px bg-white/10"></div>
+          <div class="h-px bg-slate-700 flex-1"></div>
+          <span class="text-slate-500 text-sm">OR</span>
+          <div class="h-px bg-slate-700 flex-1"></div>
         </div>
 
         <!-- Email Tabs -->
-        <div class="flex border-b border-white/10 mb-6">
-          <button onclick="switchTab(0)" id="tab-login" 
-            class="flex-1 py-3 text-lg font-medium border-b-2 border-blue-500 text-white">Login</button>
+        <div class="flex border-b border-slate-700 mb-8">
+          <button onclick="switchTab(0)" id="tab-login"
+            class="flex-1 pb-4 text-lg font-medium border-b-2 border-blue-500 text-white">Login</button>
           <button onclick="switchTab(1)" id="tab-signup"
-            class="flex-1 py-3 text-lg font-medium text-zinc-400">Sign Up</button>
+            class="flex-1 pb-4 text-lg font-medium text-slate-400">Sign Up</button>
         </div>
 
-        <div>
-          <input id="email" type="email" placeholder="you@email.com"
-            class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-4 text-lg">
+        <input id="email" type="email" placeholder="Email address"
+          class="w-full bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-blue-500 mb-4">
 
-          <input id="password" type="password" placeholder="••••••••"
-            class="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 mb-6 text-lg">
+        <input id="password" type="password" placeholder="Password"
+          class="w-full bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-blue-500 mb-8">
 
-          <button onclick="handleEmailAuth()" id="auth-btn"
-            class="w-full bg-blue-600 hover:bg-blue-700 transition-all font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
-            <span id="btn-text">Login</span>
-            <i id="btn-spinner" class="hidden fas fa-spinner fa-spin"></i>
-          </button>
+        <button onclick="handleEmailAuth()" id="auth-btn"
+          class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-2">
+          <span id="btn-text">Login</span>
+          <i id="btn-spinner" class="hidden fas fa-spinner fa-spin"></i>
+        </button>
 
-          <p id="message" class="text-center mt-6 text-sm min-h-[1.25rem]"></p>
-        </div>
+        <p id="message" class="text-center mt-6 text-red-400 text-sm min-h-[24px]"></p>
       </div>
     </div>
 
     <!-- Dashboard -->
     <div id="dashboard" class="hidden">
-      <div class="flex justify-between items-center mb-8">
+      <div class="flex items-center justify-between mb-10">
         <div>
-          <h2 class="text-3xl font-bold">Welcome back 👋</h2>
-          <p id="user-email" class="text-zinc-400 mt-1"></p>
+          <h2 class="text-4xl font-semibold flex items-center gap-3">
+            Welcome back <span class="text-3xl">👋</span>
+          </h2>
+          <p id="user-email" class="text-slate-400 mt-1 text-lg"></p>
         </div>
         <button onclick="logout()" 
-          class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl flex items-center gap-2 transition-all font-medium">
-          <i class="fas fa-sign-out-alt"></i> Logout
+          class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 px-6 py-3 rounded-2xl transition font-medium">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
         </button>
       </div>
 
-      <div class="glass rounded-3xl p-8 border border-white/10">
-        <h3 class="font-semibold text-xl mb-5 flex items-center gap-2">
-          <i class="fas fa-list-check"></i> Your Notes
+      <!-- Notes Section -->
+      <div class="glass rounded-3xl p-8">
+        <h3 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+          <i class="fas fa-sticky-note"></i>
+          Your Notes
         </h3>
 
-        <div class="flex gap-3 mb-6">
-          <input id="new-note" placeholder="Write a new note..." 
-            class="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500 text-base">
+        <!-- Add Note -->
+        <div class="flex gap-3 mb-8">
+          <input id="new-note" 
+            placeholder="Write a new note..." 
+            class="flex-1 bg-slate-800 border border-slate-600 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
           <button onclick="addNote()" 
-            class="bg-emerald-600 hover:bg-emerald-700 px-8 rounded-2xl font-semibold transition-all">
+            class="bg-emerald-600 hover:bg-emerald-700 px-10 rounded-2xl font-semibold transition">
             Add
           </button>
         </div>
 
-        <div id="notes-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-2">
-          <!-- Notes will be loaded here -->
+        <!-- Notes List -->
+        <div id="notes-list" class="space-y-4 max-h-[480px] overflow-y-auto pr-2">
+          <!-- Notes populated by JS -->
         </div>
       </div>
     </div>
   </div>
 
   <script type="module">
-    // ================== YOUR FIREBASE CONFIG ==================
+    // ================== FIREBASE CONFIG ==================
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -139,33 +158,23 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Enable offline persistence
-    enableIndexedDbPersistence(db).catch((err) => {
-      console.warn("Offline persistence issue:", err.code);
-    });
+    enableIndexedDbPersistence(db).catch(() => {});
 
     let currentUser = null;
     let notesUnsubscribe = null;
 
-    // ====================== GOOGLE SIGN IN ======================
-    window.signInWithGoogle = async function() {
+    // Google Sign In
+    window.signInWithGoogle = async () => {
       const provider = new GoogleAuthProvider();
-      const messageEl = document.getElementById('message');
-      messageEl.textContent = '';
-
       try {
         await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error(error);
-        messageEl.textContent = error.message.includes("popup") 
-          ? "Popup was blocked or closed. Please try again." 
-          : error.message.replace('Firebase: ', '');
-        messageEl.className = "text-red-400 text-center mt-4 text-sm";
+      } catch (err) {
+        showMessage(err.message.replace('Firebase: ', ''), 'red');
       }
     };
 
-    // ====================== EMAIL AUTH ======================
-    window.handleEmailAuth = async function() {
+    // Email Auth
+    window.handleEmailAuth = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const messageEl = document.getElementById('message');
@@ -174,27 +183,23 @@
       const btnText = document.getElementById('btn-text');
 
       if (!email || !password) {
-        messageEl.textContent = "Please fill in all fields";
-        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+        showMessage("Please fill in all fields", "red");
         return;
       }
 
       btn.disabled = true;
       spinner.classList.remove('hidden');
-      btnText.textContent = 'Working...';
-      messageEl.textContent = '';
+      btnText.textContent = "Please wait...";
 
       try {
         const isLogin = document.getElementById('tab-login').classList.contains('border-b-2');
-        
         if (isLogin) {
           await signInWithEmailAndPassword(auth, email, password);
         } else {
           await createUserWithEmailAndPassword(auth, email, password);
         }
       } catch (err) {
-        messageEl.textContent = err.message.replace('Firebase: ', '');
-        messageEl.className = "text-red-400 text-center mt-6 text-sm";
+        showMessage(err.message.replace('Firebase: ', ''), "red");
       } finally {
         btn.disabled = false;
         spinner.classList.add('hidden');
@@ -202,7 +207,13 @@
       }
     };
 
-    window.switchTab = function(tab) {
+    function showMessage(text, color = "red") {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = `text-center mt-6 text-${color}-400 text-sm`;
+    }
+
+    window.switchTab = (tab) => {
       const loginTab = document.getElementById('tab-login');
       const signupTab = document.getElementById('tab-signup');
       const btnText = document.getElementById('btn-text');
@@ -219,15 +230,12 @@
       document.getElementById('message').textContent = '';
     };
 
-    window.logout = function() {
-      signOut(auth).catch(console.error);
-    };
+    window.logout = () => signOut(auth);
 
-    // ====================== NOTES ======================
-    window.addNote = async function() {
+    // Add Note
+    window.addNote = async () => {
       const input = document.getElementById('new-note');
       const text = input.value.trim();
-      
       if (!text || !currentUser) return;
 
       try {
@@ -238,22 +246,21 @@
         });
         input.value = '';
       } catch (e) {
-        console.error("Error adding note:", e);
-        alert("Failed to save note. Please check your connection.");
+        alert("Failed to save note. Check your connection.");
       }
     };
 
-    window.deleteNote = async function(noteId) {
+    // Delete Note
+    window.deleteNote = async (noteId) => {
       if (!confirm("Delete this note?")) return;
-      
       try {
         await deleteDoc(doc(db, "notes", noteId));
       } catch (e) {
-        console.error("Error deleting note:", e);
         alert("Failed to delete note.");
       }
     };
 
+    // Load Notes
     function loadNotes(user) {
       if (notesUnsubscribe) notesUnsubscribe();
 
@@ -263,36 +270,35 @@
         const container = document.getElementById('notes-list');
         container.innerHTML = '';
 
-        let hasNotes = false;
-
-        snapshot.forEach((docSnapshot) => {
-          const note = docSnapshot.data();
+        let count = 0;
+        snapshot.forEach((docSnap) => {
+          const note = docSnap.data();
           if (note.userId !== user.uid) return;
-          hasNotes = true;
+          count++;
 
           const div = document.createElement('div');
-          div.className = "bg-white/5 border border-white/10 rounded-2xl p-5 flex justify-between items-start group hover:border-blue-400/50 transition-all";
+          div.className = "note-card glass rounded-2xl p-5 flex justify-between items-start group";
           div.innerHTML = `
-            <p class="text-zinc-200 flex-1 pr-4">${note.text}</p>
-            <button onclick="deleteNote('${docSnapshot.id}')" 
-              class="text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition p-1">
-              <i class="fas fa-trash"></i>
+            <p class="text-slate-200 text-[17px] leading-relaxed flex-1">${note.text}</p>
+            <button onclick="deleteNote('${docSnap.id}')" 
+              class="text-slate-500 hover:text-red-400 transition opacity-0 group-hover:opacity-100 p-2 -mr-2">
+              <i class="fas fa-trash text-lg"></i>
             </button>
           `;
           container.appendChild(div);
         });
 
-        if (!hasNotes) {
+        if (count === 0) {
           container.innerHTML = `
-            <p class="text-zinc-500 text-center py-12">
-              No notes yet.<br>
-              <span class="text-sm">Add one above to get started ✨</span>
-            </p>`;
+            <div class="text-center py-16 text-slate-400">
+              <p class="text-xl">No notes yet.</p>
+              <p class="mt-2">Add one above to get started ✨</p>
+            </div>`;
         }
       });
     }
 
-    // ====================== AUTH STATE LISTENER ======================
+    // Auth State
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       const authScreen = document.getElementById('auth-screen');
@@ -301,29 +307,23 @@
       if (user) {
         authScreen.classList.add('hidden');
         dashboard.classList.remove('hidden');
-        
-        const displayEmail = user.email || (user.displayName ? user.displayName + " (Google)" : "User");
-        document.getElementById('user-email').textContent = displayEmail;
-        
+        document.getElementById('user-email').textContent = user.email || user.displayName || "User";
         loadNotes(user);
       } else {
         authScreen.classList.remove('hidden');
         dashboard.classList.add('hidden');
-        if (notesUnsubscribe) {
-          notesUnsubscribe();
-          notesUnsubscribe = null;
-        }
+        if (notesUnsubscribe) notesUnsubscribe();
       }
     });
 
-    // Enter key support
+    // Keyboard support
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        if (!document.getElementById('auth-screen').classList.contains('hidden')) {
-          handleEmailAuth();
-        } else {
+        if (document.getElementById('auth-screen').classList.contains('hidden')) {
           const input = document.getElementById('new-note');
           if (document.activeElement === input) addNote();
+        } else {
+          handleEmailAuth();
         }
       }
     });
