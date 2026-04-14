@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NeonVault</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: linear-gradient(135deg, #0a0f1c 0%, #1a2338 100%);
     }
     .glass {
       background: rgba(15, 23, 42, 0.75);
@@ -22,79 +22,72 @@
     }
     .note-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.15);
+      box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.2);
       border-color: rgb(59 130 246);
     }
     .toast {
-      animation: toastIn 0.3s ease, toastOut 0.3s 2.5s ease forwards;
+      animation: toastIn 0.3s ease forwards, toastOut 0.3s 2.7s ease forwards;
     }
     @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes toastOut { to { opacity: 0; transform: translateY(20px); } }
   </style>
 </head>
-<body class="min-h-screen text-white">
+<body class="min-h-screen text-white bg-gradient-to-br from-[#0a0f1c] to-[#1a2338]">
 
-  <!-- HEADER (only visible when logged in) -->
+  <!-- Top Header -->
   <div id="header" class="hidden fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
-    <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="max-w-5xl mx-auto px-8 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <h1 class="text-3xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">NeonVault</h1>
       </div>
-      
-      <div class="flex items-center gap-4">
-        <!-- User Avatar -->
-        <div onclick="toggleSettings()" class="flex items-center gap-3 cursor-pointer">
-          <img id="user-avatar" src="https://via.placeholder.com/32" alt="Avatar" 
-               class="w-8 h-8 rounded-2xl object-cover ring-2 ring-blue-500/30">
-          <div>
-            <p id="user-name" class="text-sm font-medium"></p>
-            <p id="user-email-header" class="text-xs text-slate-400"></p>
+
+      <div class="flex items-center gap-6">
+        <!-- User / Avatar -->
+        <div onclick="toggleSettings()" class="flex items-center gap-3 cursor-pointer hover:bg-white/10 px-3 py-2 rounded-3xl transition">
+          <img id="user-avatar" src="https://via.placeholder.com/36" alt="" 
+               class="w-9 h-9 rounded-2xl ring-2 ring-blue-400/30 object-cover">
+          <div class="text-right">
+            <p id="user-name" class="text-sm font-semibold"></p>
+            <p id="user-email-header" class="text-xs text-slate-400 -mt-0.5"></p>
           </div>
         </div>
 
-        <!-- Settings Gear -->
+        <!-- Settings Button -->
         <button onclick="toggleSettings()" 
-          class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl transition">
-          <i class="fas fa-cog text-xl"></i>
-        </button>
-
-        <!-- Logout -->
-        <button onclick="logout()" 
-          class="flex items-center gap-2 px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl text-sm font-medium transition">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Logout</span>
+          class="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-white/10 transition text-slate-300 hover:text-white">
+          <i class="fas fa-cog text-2xl"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <div class="max-w-3xl mx-auto pt-20 px-6 pb-12">
+  <div class="max-w-5xl mx-auto pt-24 px-8 pb-12">
 
     <!-- AUTH SCREEN -->
-    <div id="auth-screen">
-      <div class="max-w-md mx-auto text-center pt-16">
-        <h1 class="text-6xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">NeonVault</h1>
-        <p class="text-slate-400 text-xl">Beautiful notes that live in the cloud</p>
+    <div id="auth-screen" class="max-w-md mx-auto">
+      <div class="text-center mb-12">
+        <h1 class="text-6xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">NeonVault</h1>
+        <p class="text-slate-400 mt-3 text-xl">Your beautiful cloud notes</p>
       </div>
 
-      <div class="glass rounded-3xl p-10 mt-12 max-w-md mx-auto">
+      <div class="glass rounded-3xl p-10">
         <button onclick="signInWithGoogle()" 
-          class="w-full bg-white text-black font-semibold py-5 rounded-3xl flex items-center justify-center gap-4 hover:bg-gray-100 transition text-xl mb-8">
+          class="w-full bg-white text-black font-semibold py-5 rounded-3xl flex items-center justify-center gap-4 text-xl mb-8 hover:shadow-xl transition">
           <i class="fab fa-google text-2xl"></i>
           Continue with Google
         </button>
 
         <div class="flex items-center gap-4 my-8">
-          <div class="h-px bg-slate-700 flex-1"></div>
-          <span class="text-slate-500 text-sm font-medium">OR</span>
-          <div class="h-px bg-slate-700 flex-1"></div>
+          <div class="flex-1 h-px bg-slate-700"></div>
+          <span class="text-slate-400 text-sm font-medium">OR</span>
+          <div class="flex-1 h-px bg-slate-700"></div>
         </div>
 
-        <div class="flex border-b border-slate-700 mb-8">
-          <button onclick="switchTab(0)" id="tab-login"
-            class="flex-1 pb-5 text-xl font-medium border-b-2 border-blue-500 text-white">Login</button>
-          <button onclick="switchTab(1)" id="tab-signup"
-            class="flex-1 pb-5 text-xl font-medium text-slate-400">Sign Up</button>
+        <div class="flex mb-8 border-b border-slate-700">
+          <button onclick="switchTab(0)" id="tab-login" 
+            class="flex-1 pb-4 text-xl font-medium border-b-2 border-blue-500 text-white">Login</button>
+          <button onclick="switchTab(1)" id="tab-signup" 
+            class="flex-1 pb-4 text-xl font-medium text-slate-400">Sign Up</button>
         </div>
 
         <input id="email" type="email" placeholder="you@email.com"
@@ -115,71 +108,100 @@
 
     <!-- DASHBOARD -->
     <div id="dashboard" class="hidden">
-      <div class="glass rounded-3xl p-8">
-        <div class="flex justify-between items-center mb-8">
-          <h2 class="text-3xl font-semibold flex items-center gap-3">
-            <i class="fas fa-sticky-note text-blue-400"></i>
-            Your Notes
-            <span id="note-count" class="text-base font-normal text-slate-400">(0)</span>
-          </h2>
+      <div class="glass rounded-3xl p-10">
+
+        <!-- Search + Count -->
+        <div class="flex justify-between items-end mb-8">
+          <div>
+            <h2 class="text-3xl font-semibold flex items-center gap-3">
+              <i class="fas fa-sticky-note text-blue-400"></i> 
+              Your Notes 
+              <span id="note-count" class="text-base font-normal text-slate-400">(0)</span>
+            </h2>
+          </div>
           <input id="search-input" 
-            onkeyup="filterNotes()" 
-            placeholder="Search notes..." 
-            class="bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-3xl px-6 py-3 w-72 outline-none">
+            onkeyup="performSearch()" 
+            placeholder="🔎 Search notes..." 
+            class="bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-3xl px-6 py-3 w-96 outline-none text-lg placeholder:text-slate-400">
         </div>
 
-        <!-- Add Note -->
-        <div class="flex gap-3 mb-10">
+        <!-- Add New Note -->
+        <div class="flex gap-4 mb-10">
           <input id="new-note" 
-            placeholder="Write something amazing..." 
+            placeholder="Write a new note..." 
             class="flex-1 bg-slate-900 border border-slate-700 rounded-3xl px-7 py-5 text-lg focus:outline-none focus:border-emerald-500">
           <button onclick="addNote()" 
-            class="bg-emerald-600 hover:bg-emerald-700 px-10 rounded-3xl font-semibold text-lg transition">
-            Add
+            class="bg-emerald-600 hover:bg-emerald-700 px-12 rounded-3xl font-semibold text-lg transition whitespace-nowrap">
+            Add Note
           </button>
         </div>
 
-        <!-- Notes List -->
-        <div id="notes-list" class="space-y-6 min-h-[400px]">
-          <!-- Populated by JS -->
+        <!-- Notes Grid -->
+        <div id="notes-list" class="space-y-6 min-h-[500px]">
+          <!-- JS populated -->
         </div>
       </div>
     </div>
   </div>
 
   <!-- SETTINGS MODAL -->
-  <div id="settings-modal" onclick="if(event.target.id === 'settings-modal') toggleSettings()" 
+  <div id="settings-modal" onclick="if(event.target.id==='settings-modal')toggleSettings()" 
        class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
     <div onclick="event.stopImmediatePropagation()" 
-         class="glass rounded-3xl w-full max-w-md mx-4 p-8">
-      <h3 class="text-2xl font-semibold mb-8 flex items-center gap-3">
-        <i class="fas fa-cog"></i> Settings
-      </h3>
-      
-      <div class="space-y-6">
-        <div class="flex items-center justify-between">
+         class="glass rounded-3xl w-full max-w-lg mx-6 p-10">
+      <h3 class="text-3xl font-semibold mb-8 flex items-center gap-3"><i class="fas fa-cog"></i> Settings</h3>
+
+      <div class="space-y-8">
+        <!-- Theme -->
+        <div class="flex justify-between items-center">
           <div>
-            <p class="font-medium">Confirm before deleting</p>
-            <p class="text-sm text-slate-400">Ask before removing notes</p>
+            <p class="font-medium">Theme</p>
+            <p class="text-sm text-slate-400">Switch between dark and light mode</p>
+          </div>
+          <button onclick="toggleTheme()" id="theme-btn"
+            class="px-5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 flex items-center gap-2 transition">
+            <i id="theme-icon" class="fas fa-moon"></i>
+            <span id="theme-text">Dark</span>
+          </button>
+        </div>
+
+        <!-- Auto Clear -->
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-medium">Auto-clear input after adding note</p>
+            <p class="text-sm text-slate-400">Clear the box automatically</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="auto-clear-toggle" checked onchange="saveSettings()" class="sr-only peer">
+            <div class="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 transition"></div>
+            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-6 transition"></div>
+          </label>
+        </div>
+
+        <!-- Confirm Delete -->
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-medium">Confirm before deleting notes</p>
+            <p class="text-sm text-slate-400">Show confirmation dialog</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="confirm-toggle" onchange="saveSettings()" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 transition"></div>
-            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-5 transition"></div>
+            <div class="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 transition"></div>
+            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-6 transition"></div>
           </label>
         </div>
       </div>
 
       <button onclick="toggleSettings()" 
-        class="mt-10 w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-3xl text-lg font-medium transition">
-        Close
+        class="mt-12 w-full py-5 bg-slate-800 hover:bg-slate-700 rounded-3xl text-xl font-medium transition">
+        Close Settings
       </button>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toast" class="hidden fixed bottom-6 right-6 glass text-white px-6 py-4 rounded-3xl flex items-center gap-3 shadow-2xl">
-    <i id="toast-icon" class="fas fa-check-circle text-emerald-400"></i>
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-8 right-8 glass px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 text-white">
+    <i id="toast-icon" class="fas fa-check-circle text-emerald-400 text-xl"></i>
     <span id="toast-text" class="font-medium"></span>
   </div>
 
@@ -214,43 +236,73 @@
     let currentUser = null;
     let notesUnsubscribe = null;
     let allNotes = [];
-    let confirmDelete = false; // default: no confirmation (fast UX)
+    let fuseInstance = null;
+    let settings = {
+      autoClear: true,
+      confirmDelete: false,
+      theme: 'dark'
+    };
 
-    // Load settings from localStorage
+    // Load settings
     function loadSettings() {
       const saved = localStorage.getItem('neonvault_settings');
       if (saved) {
-        const settings = JSON.parse(saved);
-        confirmDelete = settings.confirmDelete || false;
-        document.getElementById('confirm-toggle').checked = confirmDelete;
+        settings = { ...settings, ...JSON.parse(saved) };
       }
+      // Apply theme
+      if (settings.theme === 'light') document.documentElement.classList.remove('dark');
+      else document.documentElement.classList.add('dark');
+
+      document.getElementById('auto-clear-toggle').checked = settings.autoClear;
+      document.getElementById('confirm-toggle').checked = settings.confirmDelete;
+      updateThemeUI();
     }
 
     function saveSettings() {
-      confirmDelete = document.getElementById('confirm-toggle').checked;
-      localStorage.setItem('neonvault_settings', JSON.stringify({ confirmDelete }));
+      settings.autoClear = document.getElementById('auto-clear-toggle').checked;
+      settings.confirmDelete = document.getElementById('confirm-toggle').checked;
+      localStorage.setItem('neonvault_settings', JSON.stringify(settings));
+    }
+
+    function updateThemeUI() {
+      const btn = document.getElementById('theme-btn');
+      const icon = document.getElementById('theme-icon');
+      const text = document.getElementById('theme-text');
+      if (settings.theme === 'light') {
+        icon.className = 'fas fa-sun';
+        text.textContent = 'Light';
+      } else {
+        icon.className = 'fas fa-moon';
+        text.textContent = 'Dark';
+      }
+    }
+
+    function toggleTheme() {
+      settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
+      if (settings.theme === 'light') document.documentElement.classList.remove('dark');
+      else document.documentElement.classList.add('dark');
+      saveSettings();
+      updateThemeUI();
     }
 
     function showToast(message, success = true) {
       const toast = document.getElementById('toast');
-      const text = document.getElementById('toast-text');
-      const icon = document.getElementById('toast-icon');
-      
-      text.textContent = message;
-      icon.className = success ? "fas fa-check-circle text-emerald-400" : "fas fa-exclamation-circle text-red-400";
+      document.getElementById('toast-text').textContent = message;
+      document.getElementById('toast-icon').className = success 
+        ? "fas fa-check-circle text-emerald-400 text-xl" 
+        : "fas fa-exclamation-circle text-red-400 text-xl";
       toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 2800);
+      setTimeout(() => toast.classList.add('hidden'), 3000);
     }
 
-    // Time ago
     function timeAgo(ts) {
       if (!ts) return "just now";
       const diff = Date.now() - ts.toMillis();
-      const minutes = Math.floor(diff / 60000);
-      if (minutes < 1) return "just now";
-      if (minutes < 60) return `${minutes}m ago`;
-      if (minutes < 1440) return `${Math.floor(minutes/60)}h ago`;
-      return `${Math.floor(minutes/1440)}d ago`;
+      const min = Math.floor(diff / 60000);
+      if (min < 1) return "just now";
+      if (min < 60) return `${min}m ago`;
+      if (min < 1440) return `${Math.floor(min/60)}h ago`;
+      return `${Math.floor(min/1440)}d ago`;
     }
 
     window.signInWithGoogle = async () => {
@@ -269,7 +321,7 @@
       const spinner = document.getElementById('btn-spinner');
       const btnText = document.getElementById('btn-text');
 
-      if (!email || !password) return showMessage("Fill all fields", "red");
+      if (!email || !password) return showMessage("Please fill all fields", "red");
 
       btn.disabled = true;
       spinner.classList.remove('hidden');
@@ -298,17 +350,17 @@
     }
 
     window.switchTab = (tab) => {
-      const loginTab = document.getElementById('tab-login');
-      const signupTab = document.getElementById('tab-signup');
+      const login = document.getElementById('tab-login');
+      const signup = document.getElementById('tab-signup');
       const btnText = document.getElementById('btn-text');
 
       if (tab === 0) {
-        loginTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
-        signupTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        login.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        signup.classList.remove('border-b-2', 'border-blue-500', 'text-white');
         btnText.textContent = 'Login';
       } else {
-        signupTab.classList.add('border-b-2', 'border-blue-500', 'text-white');
-        loginTab.classList.remove('border-b-2', 'border-blue-500', 'text-white');
+        signup.classList.add('border-b-2', 'border-blue-500', 'text-white');
+        login.classList.remove('border-b-2', 'border-blue-500', 'text-white');
         btnText.textContent = 'Create Account';
       }
       document.getElementById('message').textContent = '';
@@ -328,21 +380,24 @@
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        input.value = '';                    // ← AUTO CLEAR
-        showToast("Note added ✨");
+
+        showToast("Note added successfully ✨");
+        
+        // AUTO CLEAR (respects setting)
+        if (settings.autoClear) input.value = '';
       } catch (e) {
         showToast("Failed to add note", false);
       }
     };
 
     window.deleteNote = async (noteId) => {
-      if (confirmDelete && !confirm("Delete this note forever?")) return;
+      if (settings.confirmDelete && !confirm("Delete this note permanently?")) return;
       
       try {
         await deleteDoc(doc(db, "notes", noteId));
         showToast("Note deleted");
       } catch (e) {
-        showToast("Failed to delete", false);
+        showToast("Failed to delete note", false);
       }
     };
 
@@ -356,35 +411,45 @@
       } catch (e) {}
     };
 
-    function filterNotes() {
-      const term = document.getElementById('search-input').value.toLowerCase().trim();
+    function performSearch() {
+      const term = document.getElementById('search-input').value.trim();
       const container = document.getElementById('notes-list');
-      container.innerHTML = '';
 
-      const filtered = allNotes.filter(n => n.text.toLowerCase().includes(term));
-      
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-center py-16 text-slate-400">No notes match your search.</div>`;
+      if (!term) {
+        renderNotes(allNotes);
         return;
       }
-      renderNotes(filtered);
+
+      if (!fuseInstance) return;
+
+      const results = fuseInstance.search(term);
+      const matchedNotes = results.map(r => r.item);
+      renderNotes(matchedNotes);
     }
 
     function renderNotes(notes) {
       const container = document.getElementById('notes-list');
       container.innerHTML = '';
 
+      if (notes.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-20 text-slate-400">
+            <i class="fas fa-search text-5xl mb-4 opacity-30"></i>
+            <p class="text-xl">No notes found</p>
+          </div>`;
+        return;
+      }
+
       notes.forEach(note => {
         const div = document.createElement('div');
-        div.className = "note-card glass rounded-3xl p-7 flex flex-col";
+        div.className = "note-card glass rounded-3xl p-8 flex flex-col";
         div.innerHTML = `
           <div contenteditable="true" spellcheck="false"
             onblur="updateNote('${note.id}', this.innerText)"
-            class="text-slate-100 text-lg leading-relaxed outline-none min-h-[80px]">${note.text}</div>
-          
-          <div class="flex justify-between items-center mt-6 text-xs text-slate-400">
+            class="text-slate-100 text-[17px] leading-relaxed outline-none min-h-[100px]">${note.text}</div>
+          <div class="flex justify-between items-center mt-6 pt-6 border-t border-slate-700 text-xs text-slate-400">
             <span>${timeAgo(note.updatedAt || note.createdAt)}</span>
-            <button onclick="deleteNote('${note.id}')" class="hover:text-red-400 transition flex items-center gap-1">
+            <button onclick="deleteNote('${note.id}')" class="hover:text-red-400 flex items-center gap-1.5 transition">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -406,6 +471,15 @@
         });
 
         document.getElementById('note-count').textContent = `(${allNotes.length})`;
+
+        // Initialize Fuse.js for fuzzy search
+        fuseInstance = new Fuse(allNotes, {
+          keys: ['text'],
+          threshold: 0.4,
+          distance: 100,
+          includeScore: true
+        });
+
         renderNotes(allNotes);
       });
     }
@@ -415,7 +489,7 @@
       modal.classList.toggle('hidden');
     }
 
-    // MAIN AUTH LISTENER
+    // Auth State
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       const authScreen = document.getElementById('auth-screen');
@@ -428,13 +502,9 @@
         header.classList.remove('hidden');
 
         // Avatar & name
-        const avatar = document.getElementById('user-avatar');
-        const nameEl = document.getElementById('user-name');
-        const emailEl = document.getElementById('user-email-header');
-
-        avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
-        nameEl.textContent = user.displayName || "User";
-        emailEl.textContent = user.email;
+        document.getElementById('user-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'User')}&background=3b82f6&color=fff`;
+        document.getElementById('user-name').textContent = user.displayName || 'User';
+        document.getElementById('user-email-header').textContent = user.email;
 
         loadSettings();
         loadNotes(user);
@@ -458,7 +528,7 @@
       }
     });
 
-    // Initial settings load
+    // Initial load
     loadSettings();
   </script>
 </body>
