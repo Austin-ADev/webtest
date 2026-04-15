@@ -379,3 +379,56 @@ body.nv-light-theme .glass[style] { background: none !important; }
 /* =========================
    End of file
    ========================= */
+/* FINAL LIGHT THEME OVERRIDES - append to end of styles.css */
+body.nv-light-theme {
+  --bg: #f7f8fb;
+  --glass: rgba(250,250,252,0.94);
+  --glass-soft: rgba(247,248,250,0.98);
+  --text: #0f1724;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Cards and notes */
+body.nv-light-theme .glass,
+body.nv-light-theme .glass-soft,
+body.nv-light-theme .note-card,
+body.nv-light-theme .note-row,
+body.nv-light-theme #notesContainer > div > .flex-1 {
+  background: linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+  color: var(--text);
+  border-radius: 12px;
+}
+
+/* Inputs and primary button */
+body.nv-light-theme input,
+body.nv-light-theme textarea,
+body.nv-light-theme .btn-ghost {
+  background: rgba(15,23,42,0.03);
+  border: 1px solid rgba(15,23,42,0.04);
+  color: var(--text);
+}
+body.nv-light-theme .btn-primary {
+  background: linear-gradient(90deg,#5b4ce6,#7a5df0);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(79,70,229,0.06);
+}
+
+/* Profile area and logout */
+body.nv-light-theme .header-profile {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(79,70,229,0.06);
+  box-shadow: 0 8px 24px rgba(2,6,23,0.04);
+  color: var(--text);
+  border-radius: 12px;
+}
+body.nv-light-theme .header-profile .profile-name { color: var(--text); font-weight:700; }
+body.nv-light-theme .header-profile .profile-email { color: #55606a; }
+
+/* Ensure icons and svgs are visible */
+body.nv-light-theme svg { filter: none; opacity: 0.95; }
+
+/* Reset inline backgrounds that might block variables */
+body.nv-light-theme .glass[style] { background: none; }

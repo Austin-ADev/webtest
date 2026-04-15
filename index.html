@@ -4,11 +4,22 @@
   <meta charset="utf-8" />
   <title>NeonVault — Notes</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Tailwind (framework) — keep this first -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Inter font (recommended) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Your custom styles LAST so they override Tailwind utilities -->
+  <link rel="stylesheet" href="/styles.css?v=2" />
+
+  <!-- Other scripts (Fuse etc.) -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 
-  <!-- Wordmark + small inline styles used by header/search -->
+  <!-- Wordmark + small inline styles used by header/search (keep these) -->
   <style>
     .neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
     .neon-word {
