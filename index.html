@@ -124,9 +124,9 @@
           .map(d => ({ id: d.id, ...d.data() }));
         renderNotes(allNotes);
       }, (error) => {
-        console.error("Firestore error:", error);
+        console.error("Firestore Error:", error);
         if (error.code === "permission-denied") {
-          showToast("Permission error. Double-check Firestore rules.", false);
+          showToast("Permission error. Rules not allowing access.", false);
         } else {
           showToast("Error loading notes", false);
         }
@@ -145,17 +145,24 @@
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        showToast("Note added successfully ✨");
+        showToast("Note added successfully ✨", true);
         input.value = "";
+        // Refresh notes
+        loadNotes(currentUser);
       } catch (e) {
-        console.error(e);
-        showToast("Failed to save. Check Firestore rules.", false);
+        console.error("Add Note Error:", e);
+        showToast("Failed to save note. Check Firestore rules.", false);
       }
     }
 
     function renderNotes(notes) {
       const container = document.getElementById("notes-list");
-      container.innerHTML = notes.length ? "" : `<p class="text-center py-16 text-slate-400">No notes yet. Write something above.</p>`;
+      container.innerHTML = "";
+
+      if (notes.length === 0) {
+        container.innerHTML = `<p class="text-center py-16 text-slate-400">No notes yet. Write something above.</p>`;
+        return;
+      }
 
       notes.forEach(note => {
         const div = document.createElement("div");
@@ -183,7 +190,7 @@
       if (!confirm("Delete this note permanently?")) return;
       try {
         await deleteDoc(doc(db, "notes", id));
-        showToast("Note deleted");
+        showToast("Note deleted", true);
       } catch (e) {
         showToast("Delete failed", false);
       }
@@ -211,7 +218,7 @@
         <span class="font-medium">${message}</span>
       `;
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2800);
+      setTimeout(() => toast.remove(), 3000);
     }
 
     window.showSettingsModal = () => document.getElementById("settings-modal").classList.remove("hidden");
