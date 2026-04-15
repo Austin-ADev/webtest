@@ -1,53 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login – ADev Notes</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>NeonVault – Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%); }
+    .glass {
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(148,163,184,0.35);
+    }
+    .nv-btn {
+      @apply w-full py-2.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition;
+    }
+  </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center text-slate-100">
 
-  <div class="login-container card">
-    <h1>ADev Notes</h1>
+  <div class="glass max-w-md w-full rounded-3xl p-8 shadow-2xl">
+    <div class="flex flex-col items-center mb-6">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/40">
+        <span class="text-2xl font-bold">NV</span>
+      </div>
+      <h1 class="mt-4 text-2xl font-semibold tracking-tight">NeonVault</h1>
+      <p class="text-sm text-slate-400 mt-1">Modern, synced notes in the cloud.</p>
+    </div>
 
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button id="emailLoginBtn">Login with Email</button>
+    <!-- Email / Password -->
+    <div class="space-y-3 mb-4">
+      <input id="emailInput" type="email" placeholder="Email"
+             class="w-full px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700/70 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <input id="passwordInput" type="password" placeholder="Password"
+             class="w-full px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700/70 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+    </div>
 
-    <hr>
+    <div class="flex gap-3 mb-4">
+      <button id="emailLoginBtn"
+              class="nv-btn bg-indigo-500 hover:bg-indigo-400 text-white">
+        Login
+      </button>
+      <button id="emailSignupBtn"
+              class="nv-btn bg-slate-800 hover:bg-slate-700 text-slate-100">
+        Sign up
+      </button>
+    </div>
 
-    <button id="googleBtn">Login with Google</button>
-    <button id="githubBtn">Login with GitHub</button>
+    <div class="flex items-center my-4">
+      <div class="flex-1 h-px bg-slate-700/70"></div>
+      <span class="px-3 text-xs uppercase tracking-wide text-slate-500">or continue with</span>
+      <div class="flex-1 h-px bg-slate-700/70"></div>
+    </div>
 
-    <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    <!-- OAuth buttons -->
+    <div class="space-y-3">
+      <button id="googleBtn"
+              class="nv-btn bg-white text-slate-900 hover:bg-slate-100">
+        <span class="text-lg">🟢</span>
+        <span>Google</span>
+      </button>
+      <button id="githubBtn"
+              class="nv-btn bg-slate-900 border border-slate-700 hover:bg-slate-800">
+        <span class="text-lg">🐙</span>
+        <span>GitHub</span>
+      </button>
+    </div>
+
+    <!-- Toasts -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
   </div>
 
+  <!-- Firebase v12 (modular) -->
   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import {
-      auth,
-      googleProvider,
-      githubProvider,
+      getAuth,
+      GoogleAuthProvider,
+      GithubAuthProvider,
       signInWithPopup,
-      signInWithEmailAndPassword
-    } from "./firebase.js";
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-    document.getElementById("googleBtn").onclick = () =>
-      signInWithPopup(auth, googleProvider).then(() => {
+    // TODO: replace with your real config
+    const firebaseConfig = {
+  apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
+  authDomain: "webtest-4943a.firebaseapp.com",
+  projectId: "webtest-4943a",
+  storageBucket: "webtest-4943a.firebasestorage.app",
+  messagingSenderId: "84924124626",
+  appId: "1:84924124626:web:73098a19326ed1a4ec8c0b",
+  measurementId: "G-9MNX5MX0Z2"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    const githubProvider = new GithubAuthProvider();
+
+    const emailInput = document.getElementById("emailInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const emailLoginBtn = document.getElementById("emailLoginBtn");
+    const emailSignupBtn = document.getElementById("emailSignupBtn");
+    const googleBtn = document.getElementById("googleBtn");
+    const githubBtn = document.getElementById("githubBtn");
+    const toastContainer = document.getElementById("toastContainer");
+
+    function toast(message, type = "info") {
+      const div = document.createElement("div");
+      div.className =
+        "px-4 py-2 rounded-xl text-sm shadow-lg " +
+        (type === "error"
+          ? "bg-red-500/90 text-white"
+          : type === "success"
+          ? "bg-emerald-500/90 text-white"
+          : "bg-slate-800/90 text-slate-100");
+      div.textContent = message;
+      toastContainer.appendChild(div);
+      setTimeout(() => div.remove(), 3000);
+    }
+
+    // Redirect if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
         window.location.href = "index.html";
-      });
+      }
+    });
 
-    document.getElementById("githubBtn").onclick = () =>
-      signInWithPopup(auth, githubProvider).then(() => {
+    emailLoginBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value.trim();
+      if (!email || !pass) return toast("Email and password required", "error");
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        toast("Logged in", "success");
         window.location.href = "index.html";
-      });
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Login failed", "error");
+      }
+    };
 
-    document.getElementById("emailLoginBtn").onclick = async () => {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
+    emailSignupBtn.onclick = async () => {
+      const email = emailInput.value.trim();
+      const pass = passwordInput.value.trim();
+      if (!email || !pass) return toast("Email and password required", "error");
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        toast("Account created", "success");
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Signup failed", "error");
+      }
+    };
 
-      await signInWithEmailAndPassword(auth, email, pass);
-      window.location.href = "index.html";
+    googleBtn.onclick = async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+        toast("Logged in with Google", "success");
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Google login failed", "error");
+      }
+    };
+
+    githubBtn.onclick = async () => {
+      try {
+        await signInWithPopup(auth, githubProvider);
+        toast("Logged in with GitHub", "success");
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "GitHub login failed", "error");
+      }
     };
   </script>
-
 </body>
 </html>
