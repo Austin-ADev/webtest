@@ -7,6 +7,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+  <style>
+    /* Inline wordmark CSS (if you prefer it in styles.css, move it there) */
+    .neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
+    .neon-mark { width:44px; height:44px; border-radius:10px; display:inline-grid; place-items:center; font-weight:800; font-size:18px; color:transparent; background: linear-gradient(135deg, #7dd3fc 0%, #c084fc 50%, #60a5fa 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 6px 18px rgba(99,102,241,0.12)); box-shadow: 0 6px 18px rgba(2,6,23,0.45), inset 0 -6px 18px rgba(255,255,255,0.02); }
+    .neon-word { font-weight:700; font-size:18px; line-height:1; color:transparent; background: linear-gradient(90deg, #7dd3fc 0%, #c084fc 45%, #a78bfa 70%, #60a5fa 100%); -webkit-background-clip: text; background-clip: text; text-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 6px 18px rgba(99,102,241,0.08), 0 12px 40px rgba(99,102,241,0.06); letter-spacing: -0.02em; }
+    .neon-tag { font-size:11px; color:rgba(230,238,248,0.7); margin-top:2px; display:block; }
+    .neon-compact { display:none; width:40px; height:40px; border-radius:10px; background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.06)); align-items:center; justify-content:center; font-weight:800; color:transparent; -webkit-background-clip: text; background-clip: text; background-image: linear-gradient(90deg,#7dd3fc,#c084fc); }
+    @media (max-width: 720px) {
+      .neon-word { display:none; }
+      .neon-tag { display:none; }
+      .neon-mark { display:none; }
+      .neon-compact { display:inline-grid; place-items:center; font-size:16px; }
+    }
+  </style>
 </head>
 <body class="min-h-screen text-slate-100">
 
