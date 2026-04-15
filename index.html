@@ -4,43 +4,17 @@
   <meta charset="UTF-8" />
   <title>NeonVault – Notes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-    }
-    .glass {
-      background: rgba(15,23,42,0.9);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(148,163,184,0.35);
-    }
-    .glass-soft {
-      background: rgba(15,23,42,0.8);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(51,65,85,0.8);
-    }
-    .toast {
-      animation: slideIn 0.35s ease forwards;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px) scale(0.95); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    .toast-hide {
-      opacity: 0 !important;
-      transform: translateY(10px) scale(0.95) !important;
-      transition: all 0.25s ease;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Fuse.js (full) -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 </head>
 <body class="min-h-screen text-slate-100">
 
   <!-- Toasts -->
   <div id="toastContainer" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
 
-  <!-- Main layout -->
-  <div class="max-w-5xl mx-auto px-4 py-6 space-y-6">
+  <div class="max-w-6xl mx-auto px-6 py-6 space-y-6">
 
     <!-- Header -->
     <header class="glass rounded-3xl px-5 py-4 flex items-center justify-between shadow-xl">
@@ -71,17 +45,20 @@
       </div>
     </header>
 
-    <!-- Note input + search -->
-    <section class="grid md:grid-cols-[2fr,1fr] gap-4">
+    <!-- Top row: new note + search -->
+    <section class="grid lg:grid-cols-[2fr,1.2fr] gap-4">
       <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-semibold text-slate-100">New note</h2>
+          <span class="nv-badge bg-slate-900/70 text-slate-300 border border-slate-700/70">
+            Private
+          </span>
         </div>
         <textarea id="newNote"
-                  class="w-full min-h-[80px] text-sm px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full min-h-[90px] text-sm px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Capture a thought..."></textarea>
         <div class="flex justify-between items-center">
-          <span class="text-xs text-slate-500">Notes are private to your account.</span>
+          <span class="text-xs text-slate-500">Synced to your account in real time.</span>
           <button id="addNoteBtn"
                   class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400 shadow-md shadow-indigo-500/40">
             Add note
@@ -90,20 +67,25 @@
       </div>
 
       <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
-        <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
+          <span class="text-[10px] text-slate-500">Fuzzy search by content & time</span>
+        </div>
         <input id="searchInput" type="text" placeholder="Search notes..."
                class="w-full px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        <p class="text-xs text-slate-500">Search is client-side and updates instantly.</p>
+        <p class="text-xs text-slate-500">
+          Powered by Fuse.js — type loosely, we’ll find it.
+        </p>
       </div>
     </section>
 
     <!-- Notes list -->
-    <section class="glass rounded-3xl p-4 shadow-xl">
+    <section class="glass rounded-3xl p-6 shadow-xl min-h-[60vh]">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-semibold text-slate-100">Your notes</h2>
         <span id="noteCount" class="text-xs text-slate-500"></span>
       </div>
-      <div id="notesContainer" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+      <div id="notesContainer" class="space-y-3 max-h-[70vh] overflow-y-auto pr-1"></div>
       <p id="emptyState" class="text-xs text-slate-500 text-center py-6 hidden">
         No notes yet. Start by writing something above.
       </p>
@@ -112,7 +94,7 @@
 
   <!-- Settings modal -->
   <div id="settingsOverlay"
-       class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-40 hidden">
+       class="nv-overlay fixed inset-0 flex items-center justify-center z-40 hidden">
     <div class="glass-soft rounded-3xl w-full max-w-sm p-5 shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-sm font-semibold">Settings</h2>
@@ -201,6 +183,7 @@
 
     let currentUser = null;
     let allNotes = [];
+    let fuse = null;
     let settings = {
       autoClear: true,
       confirmDelete: false
@@ -214,8 +197,17 @@
         error: "bg-red-500/90 text-white"
       };
       div.className =
-        `toast px-4 py-2 rounded-xl text-sm shadow-xl cursor-pointer ${colors[type]}`;
-      div.textContent = message;
+        `toast px-4 py-2 rounded-xl text-sm shadow-xl cursor-pointer flex items-center gap-2 ${colors[type]}`;
+      div.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full ${
+          type === "error"
+            ? "bg-red-300"
+            : type === "success"
+            ? "bg-emerald-300"
+            : "bg-sky-300"
+        }"></span>
+        <span>${message}</span>
+      `;
 
       div.onclick = () => {
         div.classList.add("toast-hide");
@@ -245,6 +237,7 @@
 
     function saveSettings() {
       settings.autoClear = autoClearToggle.checked;
+      confirmDeleteToggle.checked = confirmDeleteToggle.checked;
       settings.confirmDelete = confirmDeleteToggle.checked;
       localStorage.setItem("neonvault-settings", JSON.stringify(settings));
     }
@@ -302,28 +295,11 @@
       a = gg(a, b, c, d, k[9], 5, 568446438);
       d = gg(d, a, b, c, k[14], 9, -1019803690);
       c = gg(c, d, a, b, k[3], 14, -187363961);
-      b = gg(b, c, d, a, k[8], 20, 1163531501);
-      a = gg(a, b, c, d, k[13], 5, -1444681467);
-      d = gg(d, a, b, c, k[2], 9, -51403784);
-      c = gg(c, d, a, b, k[7], 14, 1735328473);
-      b = gg(b, c, d, a, k[12], 20, -1926607734);
-
-      a = hh(a, b, c, d, k[5], 4, -378558);
-      d = hh(d, a, b, c, k[8], 11, -2022574463);
-      c = hh(c, d, a, b, k[11], 16, 1839030562);
-      b = hh(b, c, d, a, k[14], 23, -35309556);
-      a = hh(a, b, c, d, k[1], 4, -1530992060);
-      d = hh(d, a, b, c, k[4], 11, 1272893353);
-      c = hh(c, d, a, b, k[7], 16, -155497632);
-      b = hh(b, c, d, a, k[10], 23, -1094730640);
-      a = hh(a, b, c, d, k[13], 4, 681279174);
-      d = hh(d, a, b, c, k[0], 11, -358537222);
-      c = hh(c, d, a, b, k[3], 16, -722521979);
-      b = hh(b, c, d, a, k[6], 23, 76029189);
-      a = hh(a, b, c, d, k[9], 4, -640364487);
-      d = hh(d, a, b, c, k[12], 11, -421815835);
-      c = hh(c, d, a, b, k[15], 16, 530742520);
-      b = hh(b, c, d, a, k[2], 23, -995338651);
+      b = gg(b, c, d, a, k[6], 23, 76029189);
+      a = gg(a, b, c, d, k[9], 4, -640364487);
+      d = gg(d, a, b, c, k[12], 11, -421815835);
+      c = gg(c, d, a, b, k[15], 16, 530742520);
+      b = gg(b, c, d, a, k[2], 23, -995338651);
 
       a = ii(a, b, c, d, k[0], 6, -198630844);
       d = ii(d, a, b, c, k[7], 10, 1126891415);
@@ -418,23 +394,42 @@
         avatar = gravatarUrl(email);
       }
       if (!avatar) {
-        avatar = "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=1f2937&color=f9fafb";
+        avatar =
+          "https://ui-avatars.com/api/?name=" +
+          encodeURIComponent(name) +
+          "&background=1f2937&color=f9fafb";
       }
       userAvatar.src = avatar;
     }
 
-    function renderNotes() {
-      const q = searchInput.value.trim().toLowerCase();
-      notesContainer.innerHTML = "";
-      const filtered = allNotes.filter((n) =>
-        !q || (n.text || "").toLowerCase().includes(q)
-      );
-      noteCount.textContent = filtered.length
-        ? `${filtered.length} note${filtered.length > 1 ? "s" : ""}`
-        : "";
-      emptyState.classList.toggle("hidden", filtered.length > 0);
+    function buildFuse() {
+      fuse = new Fuse(allNotes, {
+        keys: [
+          "text",
+          "createdString",
+          "tags" // future-proof
+        ],
+        threshold: 0.35,
+        ignoreLocation: true
+      });
+    }
 
-      filtered.forEach((note) => {
+    function renderNotes() {
+      const queryText = searchInput.value.trim();
+      let list = allNotes;
+
+      if (queryText && fuse) {
+        const results = fuse.search(queryText);
+        list = results.map(r => r.item);
+      }
+
+      notesContainer.innerHTML = "";
+      noteCount.textContent = list.length
+        ? `${list.length} note${list.length > 1 ? "s" : ""}`
+        : "";
+      emptyState.classList.toggle("hidden", list.length > 0);
+
+      list.forEach((note) => {
         const row = document.createElement("div");
         row.className =
           "flex items-start justify-between gap-3 px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80";
@@ -448,8 +443,12 @@
         textEl.textContent = note.text || "";
 
         const meta = document.createElement("div");
-        meta.className = "mt-1 text-[10px] text-slate-500";
-        meta.textContent = timeAgo(note.created || Date.now());
+        meta.className = "mt-1 text-[10px] text-slate-500 flex items-center gap-2";
+        meta.innerHTML = `
+          <span>${timeAgo(note.created || Date.now())}</span>
+          <span class="w-1 h-1 rounded-full bg-slate-600"></span>
+          <span>ID: ${note.id.slice(0, 6)}…</span>
+        `;
 
         left.appendChild(textEl);
         left.appendChild(meta);
@@ -514,8 +513,14 @@
         (snap) => {
           allNotes = [];
           snap.forEach((docSnap) => {
-            allNotes.push({ id: docSnap.id, ...docSnap.data() });
+            const data = docSnap.data();
+            allNotes.push({
+              id: docSnap.id,
+              ...data,
+              createdString: new Date(data.created || Date.now()).toISOString()
+            });
           });
+          buildFuse();
           renderNotes();
         },
         (err) => {
@@ -525,7 +530,6 @@
       );
     }
 
-    // Auth state
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "login.html";
@@ -537,7 +541,6 @@
       subscribeNotes(user);
     });
 
-    // Add note
     addNoteBtn.onclick = async () => {
       const text = newNoteEl.value.trim();
       if (!text) {
@@ -548,7 +551,8 @@
         await addDoc(collection(db, "notes"), {
           userId: currentUser.uid,
           text,
-          created: Date.now()
+          created: Date.now(),
+          tags: [] // future-proof
         });
         toast("Note added", "success");
         if (settings.autoClear) newNoteEl.value = "";
@@ -558,12 +562,10 @@
       }
     };
 
-    // Search
     searchInput.addEventListener("input", () => {
       renderNotes();
     });
 
-    // Logout
     logoutBtn.onclick = async () => {
       try {
         await signOut(auth);
@@ -574,7 +576,6 @@
       }
     };
 
-    // Settings modal
     avatarBtn.onclick = () => {
       settingsOverlay.classList.remove("hidden");
     };

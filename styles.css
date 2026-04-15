@@ -1,101 +1,83 @@
+/* NeonVault Global */
+
+:root {
+  --nv-bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+  --nv-glass: rgba(15, 23, 42, 0.9);
+  --nv-glass-soft: rgba(15, 23, 42, 0.8);
+  --nv-border-strong: rgba(148, 163, 184, 0.35);
+  --nv-border-soft: rgba(51, 65, 85, 0.8);
+}
+
 body {
-  margin: 0;
-  font-family: Inter, sans-serif;
-  background: #0d0d0f;
-  color: white;
+  background: var(--nv-bg);
+  color: #e5e7eb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
 }
 
-.nv-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+/* Glass */
+
+.glass {
+  background: var(--nv-glass);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--nv-border-strong);
 }
 
-.logo {
-  font-size: 28px;
-  font-weight: 700;
-  color: #7b5bff;
+.glass-soft {
+  background: var(--nv-glass-soft);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--nv-border-soft);
 }
 
-.nv-main {
-  padding: 20px;
-}
+/* Toasts */
 
-.nv-card {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 20px;
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
-  margin-bottom: 20px;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
-  background: rgba(255,255,255,0.08);
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  color: white;
-}
-
-.nv-btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 10px;
-  background: #6a5acd;
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.nv-btn:hover {
-  background: #7b6df0;
-}
-
-.nv-btn.primary {
-  background: #7b5bff;
-}
-
-.nv-btn.danger {
-  background: #ff4d6d;
-}
-
-.notes-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.note {
-  background: rgba(255,255,255,0.08);
-  padding: 16px;
-  border-radius: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.note-actions button {
-  margin-left: 8px;
-}
-
-#toastContainer {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-}
 .toast {
-  background: rgba(0,0,0,0.8);
-  padding: 12px 18px;
-  border-radius: 10px;
-  margin-top: 10px;
-  animation: fadeIn 0.3s ease;
+  animation: nv-slide-in 0.35s ease forwards;
 }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+
+@keyframes nv-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-hide {
+  opacity: 0 !important;
+  transform: translateY(10px) scale(0.95) !important;
+  transition: all 0.25s ease;
+}
+
+/* Scrollbars */
+
+#notesContainer::-webkit-scrollbar {
+  width: 6px;
+}
+#notesContainer::-webkit-scrollbar-track {
+  background: transparent;
+}
+#notesContainer::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.9);
+  border-radius: 999px;
+}
+
+/* Modal overlay */
+
+.nv-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+/* Utility */
+
+.nv-badge {
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
