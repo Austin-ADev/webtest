@@ -13,19 +13,6 @@
   --text: #e6eef8;
 }
 
-/* Light theme overrides */
-body.nv-light-theme {
-  --bg: linear-gradient(180deg,#f6f8fb 0%, #eef2f7 60%);
-  --glass: rgba(255,255,255,0.86);
-  --glass-soft: rgba(255,255,255,0.94);
-  --border-strong: rgba(15,23,42,0.06);
-  --border-soft: rgba(15,23,42,0.08);
-  --accent: #4f46e5;
-  --muted: #475569;
-  --text: #0b1220;
-  color-scheme: light;
-}
-
 /* Page */
 html,body{
   height:100%;
