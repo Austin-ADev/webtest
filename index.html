@@ -253,17 +253,6 @@
               </select>
             </label>
           </div>
-
-          <label class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-sm text-slate-200">Theme</div>
-              <div class="text-xs text-slate-400">Dark or light UI</div>
-            </div>
-            <select id="themeSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
-            </select>
-          </label>
         </div>
       </div>
 
@@ -325,7 +314,6 @@
     const toastWarningInput = document.getElementById("toastWarningInput");
     const toastErrorInput = document.getElementById("toastErrorInput");
     const uiDensitySelect = document.getElementById("uiDensitySelect");
-    const themeSelect = document.getElementById("themeSelect");
 
     const resetSettingsBtn = document.getElementById("resetSettingsBtn");
     const saveSettingsBtn = document.getElementById("saveSettingsBtn");
@@ -346,7 +334,6 @@
       toastMax: 4,
       toastDurations: { success: 7000, warning: 9000, error: 12000 },
       uiDensity: "comfortable",
-      theme: "dark"
     };
 
     let settings = { ...DEFAULT_SETTINGS };
@@ -477,7 +464,6 @@
       toastErrorInput.value = settings.toastDurations?.error || DEFAULT_SETTINGS.toastDurations.error;
 
       uiDensitySelect.value = settings.uiDensity || "comfortable";
-      themeSelect.value = settings.theme || "dark";
 
       applySettings();
     }
@@ -497,7 +483,6 @@
       };
 
       settings.uiDensity = uiDensitySelect.value || "comfortable";
-      settings.theme = themeSelect.value || "dark";
 
       localStorage.setItem("neonvault-settings", JSON.stringify(settings));
       applySettings();
@@ -514,13 +499,6 @@
   const pos = settings.toastPosition || "bottom-right";
   // reset classes then set new
   toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
-
-  // Theme: add/remove nv-light-theme on body
-  if (settings.theme === "light") {
-    document.body.classList.add("nv-light-theme");
-  } else {
-    document.body.classList.remove("nv-light-theme");
-  }
 
   // Density: toggle compact class and set density scale variable
   if (settings.uiDensity === "compact") {
