@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>NeonVault — Notes</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+
+  <!-- Wordmark + small inline styles used by header/search -->
+  <style>
+    .neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
+    .neon-word {
+      font-weight:700;
+      font-size:20px;
+      line-height:1;
+      color:transparent;
+      background: linear-gradient(90deg, #7dd3fc 0%, #c084fc 45%, #a78bfa 70%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow:
+        0 1px 0 rgba(255,255,255,0.02),
+        0 8px 22px rgba(99,102,241,0.08),
+        0 18px 48px rgba(99,102,241,0.06);
+      letter-spacing: -0.02em;
+    }
+    .neon-tag {
+      font-size:12px;
+      color:rgba(230,238,248,0.72);
+      margin-top:2px;
+      display:block;
+    }
+
+    /* Search filter pill */
+    .search-filter-pill {
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(99,102,241,0.08);
+      color: #e6eef8;
+      font-size:12px;
+      border:1px solid rgba(99,102,241,0.08);
+    }
+    .search-filter-pill button {
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      opacity:0.9;
+      cursor:pointer;
+      padding:0;
+      margin-left:8px;
+    }
+
+    /* Search input wrapper with clear button */
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input-wrap input[type="text"] {
+      padding-right: 44px;
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      width:28px;
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+    }
+    .search-clear-btn:hover { background: rgba(255,255,255,0.03); }
+
+    @media (max-width: 640px) {
+      .neon-word { font-size:16px; }
+      .neon-tag { display:none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100">
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
+
+  <div class="app-shell">
+    <div class="container-wide max-w-full mx-auto px-6 py-6 space-y-6 main-container">
+
+      <!-- Header -->
+      <header class="glass rounded-3xl px-6 py-4 flex items-center justify-between shadow-xl">
+        <div class="flex items-center gap-4">
+          <!-- TEXT-ONLY wordmark -->
+          <div class="neon-wordmark" aria-hidden="false" role="img" title="NeonVault">
+            <div style="display:flex;flex-direction:column;line-height:1;">
+              <span class="neon-word">NeonVault</span>
+              <span class="neon-tag">Modern, synced notes dancing in the cloud.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="hidden lg:flex flex-col items-end text-sm">
+            <span id="userName" class="font-medium text-slate-100"></span>
+            <span id="userEmail" class="text-slate-400"></span>
+          </div>
+
+          <button id="avatarBtn" class="relative">
+            <img id="userAvatar" src="" alt="avatar" class="header-avatar" />
+            <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-slate-900"></span>
+          </button>
+          <button id="logoutBtn" class="hidden lg:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
+        </div>
+      </header>
+
+      <!-- Top row -->
+      <section class="grid lg:grid-cols-[2.2fr,1fr] gap-6">
+        <div class="glass-soft rounded-3xl p-5 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-100">New note</h2>
+            <span class="nv-badge bg-slate-900/60 text-slate-300 border border-slate-700/60">Private</span>
+          </div>
+          <textarea id="newNote" placeholder="Capture a thought..." class="w-full min-h-[110px] px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-slate-500">Synced to your account in real time.</span>
+            <button id="addNoteBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400">Add note</button>
+          </div>
+        </div>
+
+        <div class="glass-soft rounded-3xl p-5 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
+            <span class="text-[10px] text-slate-500">Fuzzy search by content & time</span>
+          </div>
+
+          <!-- Search input + filter preview -->
+          <div id="searchBox" class="space-y-2">
+            <div class="search-input-wrap">
+              <input id="searchInput" type="text" placeholder="Search notes... (try: d: 16 min ago)" class="w-full px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button id="searchClearBtn" class="search-clear-btn" title="Clear search" aria-label="Clear search">✕</button>
+            </div>
+            <div id="searchFilterContainer" class="flex items-center gap-3"></div>
+            <p class="text-xs text-slate-500">Tip: prefix with <code>d:</code> to filter by relative time (e.g. <code>d: 16 min ago</code>).</p>
+          </div>
+
+          <p class="text-xs text-slate-500">Powered by Fuse.js — type loosely, we’ll find it.</p>
+        </div>
+      </section>
+
+      <!-- Notes list -->
+      <section class="glass rounded-3xl p-6 shadow-xl min-h-[60vh]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-slate-100">Your notes</h2>
+          <span id="noteCount" class="text-xs text-slate-500"></span>
+        </div>
+        <div id="notesContainer" class="space-y-3 pr-1"></div>
+        <p id="emptyState" class="text-xs text-slate-500 text-center py-6 hidden">No notes yet. Start by writing something above.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Settings modal (updated) -->
+  <div id="settingsOverlay" class="nv-overlay fixed inset-0 flex items-center justify-center z-40 hidden">
+    <div class="glass-soft rounded-3xl w-full max-w-lg p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold">Settings</h2>
+        <button id="closeSettingsBtn" class="text-xs text-slate-400 hover:text-slate-200">✕</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-sm">
+
+        <!-- Left column -->
+        <div class="space-y-4">
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Auto-clear input after adding</div>
+              <div class="text-xs text-slate-400">Clears the new note box after add</div>
+            </div>
+            <input id="autoClearToggle" type="checkbox" class="h-4 w-4 rounded border-slate-500" />
+          </label>
+
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Confirm before deleting</div>
+              <div class="text-xs text-slate-400">Ask before removing a note</div>
+            </div>
+            <input id="confirmDeleteToggle" type="checkbox" class="h-4 w-4 rounded border-slate-500" />
+          </label>
+
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Show timestamps</div>
+              <div class="text-xs text-slate-400">Display relative time on notes</div>
+            </div>
+            <input id="showTimestampsToggle" type="checkbox" class="h-4 w-4 rounded border-slate-500" />
+          </label>
+
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Note sort order</div>
+              <div class="text-xs text-slate-400">Order notes by creation time</div>
+            </div>
+            <select id="noteSortSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
+              <option value="desc">Created — newest first</option>
+              <option value="asc">Created — oldest first</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Right column -->
+        <div class="space-y-4">
+          <label class="flex flex-col gap-2">
+            <div class="text-sm text-slate-200">Toast position</div>
+            <select id="toastPositionSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
+              <option value="bottom-right">Bottom right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="top-right">Top right</option>
+              <option value="top-left">Top left</option>
+            </select>
+          </label>
+
+          <label class="flex flex-col gap-2">
+            <div class="text-sm text-slate-200">Max visible toasts</div>
+            <input id="toastMaxInput" type="number" min="1" max="8" step="1" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs" />
+          </label>
+
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex flex-col gap-1 text-xs">
+              <span class="text-sm text-slate-200">Success toast (ms)</span>
+              <input id="toastSuccessInput" type="number" min="1000" step="500" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs" />
+            </label>
+            <label class="flex flex-col gap-1 text-xs">
+              <span class="text-sm text-slate-200">Warning toast (ms)</span>
+              <input id="toastWarningInput" type="number" min="1000" step="500" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs" />
+            </label>
+            <label class="flex flex-col gap-1 text-xs">
+              <span class="text-sm text-slate-200">Error toast (ms)</span>
+              <input id="toastErrorInput" type="number" min="1000" step="500" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs" />
+            </label>
+            <label class="flex flex-col gap-1 text-xs">
+              <span class="text-sm text-slate-200">UI density</span>
+              <select id="uiDensitySelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
+                <option value="comfortable">Comfortable</option>
+                <option value="compact">Compact</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Theme</div>
+              <div class="text-xs text-slate-400">Dark or light UI</div>
+            </div>
+            <select id="themeSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="mt-5 flex justify-end gap-3">
+        <button id="resetSettingsBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-slate-800 hover:bg-slate-700">Reset</button>
+        <button id="saveSettingsBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+    /* Firebase config (provided) */
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
+      authDomain: "webtest-4943a.firebaseapp.com",
+      projectId: "webtest-4943a",
+      storageBucket: "webtest-4943a.firebasestorage.app",
+      messagingSenderId: "84924124626",
+      appId: "1:84924124626:web:73098a19326ed1a4ec8c0b",
+      measurementId: "G-9MNX5MX0Z2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    /* Elements */
+    const toastContainer = document.getElementById("toastContainer");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const avatarBtn = document.getElementById("avatarBtn");
+    const userAvatar = document.getElementById("userAvatar");
+    const userNameEl = document.getElementById("userName");
+    const userEmailEl = document.getElementById("userEmail");
+
+    const newNoteEl = document.getElementById("newNote");
+    const addNoteBtn = document.getElementById("addNoteBtn");
+    const notesContainer = document.getElementById("notesContainer");
+    const emptyState = document.getElementById("emptyState");
+    const noteCount = document.getElementById("noteCount");
+    const searchInput = document.getElementById("searchInput");
+    const searchFilterContainer = document.getElementById("searchFilterContainer");
+    const searchClearBtn = document.getElementById("searchClearBtn");
+
+    /* Settings controls */
+    const autoClearToggle = document.getElementById("autoClearToggle");
+    const confirmDeleteToggle = document.getElementById("confirmDeleteToggle");
+    const showTimestampsToggle = document.getElementById("showTimestampsToggle");
+    const noteSortSelect = document.getElementById("noteSortSelect");
+
+    const toastPositionSelect = document.getElementById("toastPositionSelect");
+    const toastMaxInput = document.getElementById("toastMaxInput");
+    const toastSuccessInput = document.getElementById("toastSuccessInput");
+    const toastWarningInput = document.getElementById("toastWarningInput");
+    const toastErrorInput = document.getElementById("toastErrorInput");
+    const uiDensitySelect = document.getElementById("uiDensitySelect");
+    const themeSelect = document.getElementById("themeSelect");
+
+    const resetSettingsBtn = document.getElementById("resetSettingsBtn");
+    const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+    const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+    const settingsOverlayEl = document.getElementById("settingsOverlay");
+
+    let currentUser = null;
+    let allNotes = [];
+    let fuse = null;
+
+    /* Default settings */
+    const DEFAULT_SETTINGS = {
+      autoClear: true,
+      confirmDelete: false,
+      showTimestamps: true,
+      noteSort: "desc",
+      toastPosition: "bottom-right",
+      toastMax: 4,
+      toastDurations: { success: 7000, warning: 9000, error: 12000 },
+      uiDensity: "comfortable",
+      theme: "dark"
+    };
+
+    let settings = { ...DEFAULT_SETTINGS };
+
+    /* createToast with settings-aware durations and max */
+    function createToast(title, subtitle = "", type = "info", duration = null) {
+      const defaults = {
+        success: settings?.toastDurations?.success || 7000,
+        warning: settings?.toastDurations?.warning || 9000,
+        error: settings?.toastDurations?.error || 12000,
+        info: 7000
+      };
+      const dur = duration == null ? (defaults[type] || 8000) : duration;
+
+      const MAX_TOASTS = settings?.toastMax || 4;
+      while (toastContainer.children.length >= MAX_TOASTS) {
+        const oldest = toastContainer.children[0];
+        if (!oldest) break;
+        oldest.classList.remove("nv-animate-in");
+        oldest.classList.add("nv-animate-out");
+        try { if (oldest._nvRaf) cancelAnimationFrame(oldest._nvRaf); } catch(e){}
+        setTimeout(() => { if (oldest && oldest.parentNode) oldest.remove(); }, 220);
+      }
+
+      const el = document.createElement("div");
+      const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
+      el.className = `nv-toast nv-animate-in ${typeClass}`;
+
+      const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
+      el.innerHTML = `
+        <div class="nv-icon">${icon}</div>
+        <div class="nv-body">
+          <div class="nv-title">${title}</div>
+          <div class="nv-sub">${subtitle}</div>
+        </div>
+        <div class="nv-progress"><i></i></div>
+      `;
+
+      const progressBar = el.querySelector(".nv-progress > i");
+      let start = Date.now();
+      let remaining = dur;
+      let rafId = null;
+      let cancelled = false;
+
+      function setProgress() {
+        if (cancelled) return;
+        const elapsed = Date.now() - start;
+        const pct = Math.max(0, 1 - elapsed / dur);
+        progressBar.style.transform = `scaleX(${pct})`;
+        if (pct > 0) rafId = requestAnimationFrame(setProgress);
+      }
+
+      el._nvRaf = requestAnimationFrame(setProgress);
+
+      el.addEventListener("mouseenter", () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        remaining = Math.max(0, dur - (Date.now() - start));
+      });
+      el.addEventListener("mouseleave", () => {
+        start = Date.now();
+        const newDur = remaining;
+        function resumeProgress() {
+          if (cancelled) return;
+          const elapsed = Date.now() - start;
+          const pct = Math.max(0, 1 - elapsed / newDur);
+          progressBar.style.transform = `scaleX(${pct})`;
+          if (pct > 0) rafId = requestAnimationFrame(resumeProgress);
+        }
+        rafId = requestAnimationFrame(resumeProgress);
+        el._nvRaf = rafId;
+      });
+
+      el.addEventListener("click", () => {
+        if (cancelled) return;
+        cancelled = true;
+        el.classList.remove("nv-animate-in");
+        el.classList.add("nv-animate-out");
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        setTimeout(() => { if (el && el.parentNode) el.remove(); }, 220);
+      });
+
+      toastContainer.appendChild(el);
+
+      const autoDismissTimer = setTimeout(() => {
+        if (cancelled) return;
+        cancelled = true;
+        el.classList.remove("nv-animate-in");
+        el.classList.add("nv-animate-out");
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        setTimeout(() => { if (el && el.parentNode) el.remove(); }, 220);
+      }, dur + 200);
+
+      el._nvCancel = () => {
+        cancelled = true;
+        clearTimeout(autoDismissTimer);
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        if (el && el.parentNode) el.remove();
+      };
+
+      return el;
+    }
+
+    /* Settings load/save/apply */
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem("neonvault-settings");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          settings = { ...DEFAULT_SETTINGS, ...parsed };
+        } else {
+          settings = { ...DEFAULT_SETTINGS };
+        }
+      } catch (e) {
+        console.warn("loadSettings failed", e);
+        settings = { ...DEFAULT_SETTINGS };
+      }
+
+      // populate controls
+      autoClearToggle.checked = !!settings.autoClear;
+      confirmDeleteToggle.checked = !!settings.confirmDelete;
+      showTimestampsToggle.checked = !!settings.showTimestamps;
+      noteSortSelect.value = settings.noteSort || "desc";
+
+      toastPositionSelect.value = settings.toastPosition || "bottom-right";
+      toastMaxInput.value = settings.toastMax || DEFAULT_SETTINGS.toastMax;
+      toastSuccessInput.value = settings.toastDurations?.success || DEFAULT_SETTINGS.toastDurations.success;
+      toastWarningInput.value = settings.toastDurations?.warning || DEFAULT_SETTINGS.toastDurations.warning;
+      toastErrorInput.value = settings.toastDurations?.error || DEFAULT_SETTINGS.toastDurations.error;
+
+      uiDensitySelect.value = settings.uiDensity || "comfortable";
+      themeSelect.value = settings.theme || "dark";
+
+      applySettings();
+    }
+
+    function saveSettings() {
+      settings.autoClear = !!autoClearToggle.checked;
+      settings.confirmDelete = !!confirmDeleteToggle.checked;
+      settings.showTimestamps = !!showTimestampsToggle.checked;
+      settings.noteSort = noteSortSelect.value || "desc";
+
+      settings.toastPosition = toastPositionSelect.value || "bottom-right";
+      settings.toastMax = Math.max(1, Math.min(8, parseInt(toastMaxInput.value || DEFAULT_SETTINGS.toastMax, 10)));
+      settings.toastDurations = {
+        success: Math.max(1000, parseInt(toastSuccessInput.value || DEFAULT_SETTINGS.toastDurations.success, 10)),
+        warning: Math.max(1000, parseInt(toastWarningInput.value || DEFAULT_SETTINGS.toastDurations.warning, 10)),
+        error: Math.max(1000, parseInt(toastErrorInput.value || DEFAULT_SETTINGS.toastDurations.error, 10))
+      };
+
+      settings.uiDensity = uiDensitySelect.value || "comfortable";
+      settings.theme = themeSelect.value || "dark";
+
+      localStorage.setItem("neonvault-settings", JSON.stringify(settings));
+      applySettings();
+    }
+
+    function resetSettings() {
+      settings = { ...DEFAULT_SETTINGS };
+      localStorage.removeItem("neonvault-settings");
+      loadSettings();
+    }
+
+    function applySettings() {
+      // Toast container position
+      const pos = settings.toastPosition || "bottom-right";
+      toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
+
+      // Theme
+      if (settings.theme === "light") {
+        document.body.classList.add("nv-light-theme");
+      } else {
+        document.body.classList.remove("nv-light-theme");
+      }
+
+      // UI density (simple scale)
+      if (settings.uiDensity === "compact") {
+        document.documentElement.style.setProperty("--nv-density-scale", "0.88");
+      } else {
+        document.documentElement.style.setProperty("--nv-density-scale", "1");
+      }
+
+      // Re-sort and render notes
+      if (allNotes && allNotes.length) {
+        allNotes.sort((a, b) => {
+          const aT = a.created || 0;
+          const bT = b.created || 0;
+          return settings.noteSort === "asc" ? aT - bT : bT - aT;
+        });
+        buildFuse();
+        renderNotes();
+      }
+    }
+
+    /* Hook up settings buttons */
+    saveSettingsBtn.addEventListener("click", () => {
+      saveSettings();
+      settingsOverlayEl.classList.add("hidden");
+      createToast("Settings saved", "Preferences updated", "success");
+    });
+    resetSettingsBtn.addEventListener("click", () => {
+      if (!confirm("Reset settings to defaults?")) return;
+      resetSettings();
+      createToast("Settings reset", "Defaults restored", "success");
+    });
+    closeSettingsBtn.addEventListener("click", () => settingsOverlayEl.classList.add("hidden"));
+
+    /* Time helper */
+    function timeAgo(ts) {
+      const diff = Date.now() - ts;
+      const sec = Math.floor(diff / 1000);
+      if (sec < 60) return "just now";
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `${min} min ago`;
+      const hr = Math.floor(min / 60);
+      if (hr < 24) return `${hr} hr${hr > 1 ? "s" : ""} ago`;
+      const d = Math.floor(hr / 24);
+      return `${d} day${d > 1 ? "s" : ""} ago`;
+    }
+
+    /* Gravatar fallback */
+    function md5(s) {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+      return (h >>> 0).toString(16).padStart(8, '0');
+    }
+    function gravatarUrl(email) {
+      const hash = md5((email||"").trim().toLowerCase());
+      return `https://www.gravatar.com/avatar/${hash}?d=identicon`;
+    }
+
+    function setUserUI(user) {
+      const name = user.displayName || user.email || "NeonVault User";
+      const email = user.email || "";
+      userNameEl.textContent = name;
+      userEmailEl.textContent = email;
+      let avatar = user.photoURL || "";
+      if (!avatar && email) avatar = gravatarUrl(email);
+      if (!avatar) avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1f2937&color=f9fafb`;
+      userAvatar.src = avatar;
+    }
+
+    /* Build Fuse */
+    function buildFuse() {
+      try {
+        fuse = new Fuse(allNotes, {
+          keys: ["text", "createdString", "tags"],
+          threshold: 0.35,
+          ignoreLocation: true
+        });
+      } catch (e) {
+        console.warn("Fuse build failed", e);
+        fuse = null;
+      }
+    }
+
+    /* Robust date filter parser */
+    function parseDateFilter(q) {
+      if (!q) return null;
+      // Accept many variants: d:16 min ago | d:16min | d: 2 hr | d:2h | d:30m | d:1 day ago
+      const re = /d:\s*([0-9]+)\s*(min|mins|minute|minutes|m|h|hr|hrs|hour|hours|d|day|days)\b/i;
+      const m = q.match(re);
+      if (!m) return null;
+      const n = parseInt(m[1], 10);
+      const unitRaw = m[2].toLowerCase();
+
+      // normalize unit
+      let unit = "min";
+      if (unitRaw === "h" || unitRaw.startsWith("hr") || unitRaw.startsWith("hour")) unit = "hour";
+      if (unitRaw === "d" || unitRaw.startsWith("day")) unit = "day";
+
+      // compute ms and tolerance
+      let ms = 0;
+      let tol = 0;
+      if (unit === "min") {
+        ms = n * 60 * 1000;
+        tol = Math.max(2 * 60 * 1000, Math.round(n * 0.25 * 60 * 1000)); // +/- 2min or 25%
+      } else if (unit === "hour") {
+        ms = n * 60 * 60 * 1000;
+        tol = Math.max(15 * 60 * 1000, Math.round(n * 0.15 * 60 * 60 * 1000)); // +/- 15min or 15%
+      } else if (unit === "day") {
+        ms = n * 24 * 60 * 60 * 1000;
+        tol = Math.max(6 * 60 * 60 * 1000, Math.round(n * 0.2 * 24 * 60 * 60 * 1000)); // +/- 6h or 20%
+      }
+
+      const targetTs = Date.now() - ms;
+      const label = `${n} ${unit}${n>1?'s':''} ago`;
+      return { targetTs, toleranceMs: tol, label, rawMatch: m[0] };
+    }
+
+    /* Render notes with d: filter and search UI */
+    function renderNotes() {
+      const rawQ = (searchInput.value || "").trim();
+      const dateFilter = parseDateFilter(rawQ);
+
+      // Start with a shallow copy of allNotes
+      let list = allNotes.slice();
+
+      // If there's a date filter, remove the matched token from the query for text search
+      let qForFuse = rawQ;
+      if (dateFilter && dateFilter.rawMatch) {
+        qForFuse = rawQ.replace(dateFilter.rawMatch, "").trim();
+      }
+
+      // If there's a text query left, run Fuse
+      if (qForFuse && fuse) {
+        try {
+          const results = fuse.search(qForFuse);
+          list = results.map(r => r.item);
+        } catch (e) {
+          console.warn("Fuse search failed:", e);
+        }
+      }
+
+      // Debug: counts before date filter
+      const beforeCount = list.length;
+
+      // If dateFilter present, filter list by timestamp proximity
+      if (dateFilter) {
+        const { targetTs, toleranceMs } = dateFilter;
+        list = list.filter(n => {
+          // defensive: coerce created to number if it's a string
+          const createdRaw = n.created;
+          const created = typeof createdRaw === "number" ? createdRaw : (Number(createdRaw) || 0);
+          return Math.abs(created - targetTs) <= toleranceMs;
+        });
+      }
+
+      // Debug: counts after date filter
+      const afterCount = list.length;
+      console.debug(`renderNotes: beforeDateFilter=${beforeCount}, afterDateFilter=${afterCount}`, dateFilter);
+
+      // Sort according to settings
+      list.sort((a, b) => {
+        const aT = a.created || 0;
+        const bT = b.created || 0;
+        return settings.noteSort === "asc" ? aT - bT : bT - aT;
+      });
+
+      // Update UI
+      notesContainer.innerHTML = "";
+      noteCount.textContent = list.length ? `${list.length} note${list.length>1?"s":""}` : "";
+      emptyState.classList.toggle("hidden", list.length > 0);
+
+      // Update search filter UI
+      searchFilterContainer.innerHTML = "";
+      if (dateFilter) {
+        const pill = document.createElement("div");
+        pill.className = "search-filter-pill";
+        pill.innerHTML = `<span>Showing notes from <strong>${dateFilter.label}</strong></span>`;
+        const clearBtn = document.createElement("button");
+        clearBtn.title = "Clear date filter";
+        clearBtn.innerHTML = "✕";
+        clearBtn.onclick = () => {
+          searchInput.value = searchInput.value.replace(dateFilter.rawMatch, "").trim();
+          renderNotes();
+          searchInput.focus();
+        };
+        pill.appendChild(clearBtn);
+        searchFilterContainer.appendChild(pill);
+      }
+
+      // Render each note
+      list.forEach(note => {
+        const row = document.createElement("div");
+        row.className = "flex items-start justify-between gap-3 px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80";
+
+        const left = document.createElement("div"); left.className = "flex-1";
+        const textEl = document.createElement("div");
+        textEl.className = "text-sm text-slate-100 outline-none";
+        textEl.contentEditable = "true";
+        textEl.textContent = note.text || "";
+
+        let originalText = textEl.textContent;
+
+        // auto-save on blur if changed
+        textEl.addEventListener("blur", async () => {
+          const newText = textEl.textContent || "";
+          if (newText === originalText) return;
+          originalText = newText;
+          try {
+            await updateDoc(doc(db, "notes", note.id), { text: newText });
+            createToast("Note saved", "Changes synced to the cloud", "success");
+          } catch (e) {
+            console.error("auto-save error", e);
+            createToast("Save failed", e.message || "Try again", "error");
+          }
+        });
+
+        // save on Enter (prevent newline)
+        textEl.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            textEl.blur();
+          }
+        });
+
+        const meta = document.createElement("div");
+        meta.className = "mt-1 text-[10px] text-slate-500 flex items-center gap-2";
+        meta.innerHTML = `${settings.showTimestamps ? `<span>${timeAgo(note.created || Date.now())}</span>` : ""}`;
+
+        left.appendChild(textEl); left.appendChild(meta);
+
+        const right = document.createElement("div"); right.className = "flex flex-col gap-1 items-end";
+        const delBtn = document.createElement("button");
+        delBtn.className = "trash-btn";
+        delBtn.title = "Delete note";
+        delBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 1 1 0-2h3.1a1 1 0 0 1 .9-.6h2a1 1 0 0 1 .9.6h3.1a1 1 0 0 1 1 1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+          </svg>
+        `;
+
+        delBtn.onclick = async () => {
+          if (settings.confirmDelete) {
+            if (!confirm("Delete this note?")) return;
+          }
+          try {
+            await deleteDoc(doc(db, "notes", note.id));
+            createToast("Note deleted", "Removed from cloud", "success");
+          } catch (e) {
+            console.error("deleteDoc error", e);
+            createToast("Delete failed", e.message || "Try again", "error");
+          }
+        };
+
+        right.appendChild(delBtn);
+        row.appendChild(left); row.appendChild(right);
+        notesContainer.appendChild(row);
+      });
+    }
+
+    /* Subscribe notes with index-aware error handling (no index link shown) */
+    function subscribeNotes(user) {
+      const notesRef = collection(db, "notes");
+      const qNotes = query(notesRef, where("userId", "==", user.uid), orderBy("created", "desc"));
+
+      onSnapshot(qNotes,
+        (snap) => {
+          allNotes = [];
+          snap.forEach(docSnap => {
+            const data = docSnap.data();
+            allNotes.push({
+              id: docSnap.id,
+              ...data,
+              createdString: new Date(data.created || Date.now()).toISOString()
+            });
+          });
+          // apply settings sort
+          allNotes.sort((a, b) => {
+            const aT = a.created || 0;
+            const bT = b.created || 0;
+            return settings.noteSort === "asc" ? aT - bT : bT - aT;
+          });
+          buildFuse();
+          renderNotes();
+        },
+        (err) => {
+          console.error("onSnapshot error:", err);
+          const msg = err && err.message ? err.message : "Failed to load notes";
+          createToast("Failed to load notes", msg, "error");
+        }
+      );
+    }
+
+    /* Auth state */
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      setUserUI(user);
+      loadSettings();
+      subscribeNotes(user);
+    });
+
+    /* Add note */
+    addNoteBtn.onclick = async () => {
+      const text = newNoteEl.value.trim();
+      if (!text) return createToast("Note empty", "Type something before adding", "warning");
+      try {
+        await addDoc(collection(db, "notes"), {
+          userId: currentUser.uid,
+          text,
+          created: Date.now(),
+          tags: []
+        });
+        createToast("Note added successfully ✨", "Your note has been saved to the cloud.", "success");
+        if (settings.autoClear) newNoteEl.value = "";
+      } catch (e) {
+        console.error("addDoc error", e);
+        createToast("Failed to add note", e.message || "Try again", "error");
+      }
+    };
+
+    /* Search input handling: re-render on input and on Enter */
+    searchInput.addEventListener("input", () => renderNotes());
+
+    // Clear button behavior
+    searchClearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      searchFilterContainer.innerHTML = "";
+      renderNotes();
+      searchInput.focus();
+    });
+
+    // When Enter is pressed while searching: focus + select input so backspace clears
+    searchInput.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        // If there's text, select it so user can press Backspace to clear quickly
+        searchInput.focus();
+        searchInput.select();
+        renderNotes();
+      }
+    });
+
+    /* Logout */
+    logoutBtn.onclick = async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (e) {
+        console.error("signOut error", e);
+        createToast("Logout failed", e.message || "Try again", "error");
+      }
+    };
+
+    /* Settings modal open */
+    avatarBtn.onclick = () => settingsOverlayEl.classList.remove("hidden");
+    settingsOverlayEl.onclick = (e) => { if (e.target === settingsOverlayEl) settingsOverlayEl.classList.add("hidden"); };
+
+    /* Expose createToast for debugging */
+    window.NV_toast = createToast;
+
+    // initial load
+    loadSettings();
+  </script>
+</body>
+</html>
