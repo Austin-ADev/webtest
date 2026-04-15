@@ -102,7 +102,7 @@
           <div class="neon-wordmark" aria-hidden="false" role="img" title="NeonVault">
             <div style="display:flex;flex-direction:column;line-height:1;">
               <span class="neon-word">NeonVault</span>
-              <span class="neon-tag">Modern, synced notes.</span>
+              <span class="neon-tag">Modern, synced notes dancing in the cloud.</span>
             </div>
           </div>
         </div>
@@ -253,6 +253,17 @@
               </select>
             </label>
           </div>
+
+          <label class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm text-slate-200">Theme</div>
+              <div class="text-xs text-slate-400">Dark or light UI</div>
+            </div>
+            <select id="themeSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -499,36 +510,35 @@
     }
 
     function applySettings() {
-  // Toast container position
-  const pos = settings.toastPosition || "bottom-right";
-  // reset classes then set new
-  toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
+      // Toast container position
+      const pos = settings.toastPosition || "bottom-right";
+      toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
 
-  // Density: toggle compact class and set density scale variable
-  if (settings.uiDensity === "compact") {
-    document.body.classList.add("nv-compact");
-    document.documentElement.style.setProperty("--nv-density-scale", "0.88");
-  } else {
-    document.body.classList.remove("nv-compact");
-    document.documentElement.style.setProperty("--nv-density-scale", "1");
-  }
+      // Theme
+      if (settings.theme === "light") {
+        document.body.classList.add("nv-light-theme");
+      } else {
+        document.body.classList.remove("nv-light-theme");
+      }
 
-  // Ensure toast max is available to createToast (no DOM change needed here)
-  // Re-sort and render notes according to settings.noteSort
-  if (allNotes && allNotes.length) {
-    allNotes.sort((a, b) => {
-      const aT = a.created || 0;
-      const bT = b.created || 0;
-      return settings.noteSort === "asc" ? aT - bT : bT - aT;
-    });
-    buildFuse();
-    renderNotes();
-  } else {
-    // still apply visual changes even if no notes
-    renderNotes();
-  }
-}
+      // UI density (simple scale)
+      if (settings.uiDensity === "compact") {
+        document.documentElement.style.setProperty("--nv-density-scale", "0.88");
+      } else {
+        document.documentElement.style.setProperty("--nv-density-scale", "1");
+      }
 
+      // Re-sort and render notes
+      if (allNotes && allNotes.length) {
+        allNotes.sort((a, b) => {
+          const aT = a.created || 0;
+          const bT = b.created || 0;
+          return settings.noteSort === "asc" ? aT - bT : bT - aT;
+        });
+        buildFuse();
+        renderNotes();
+      }
+    }
 
     /* Hook up settings buttons */
     saveSettingsBtn.addEventListener("click", () => {
@@ -875,6 +885,6 @@
 
     // initial load
     loadSettings();
-    </script>
+  </script>
 </body>
 </html>

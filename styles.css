@@ -3,6 +3,7 @@
 *::before,
 *::after { box-sizing: border-box; transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease, box-shadow .18s ease; }
 
+<<<<<<< HEAD
 :root{
   --nv-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --nv-base-font-size: 15px;
@@ -53,6 +54,254 @@ input, textarea, .btn-ghost {
 
 /* profile environment (restore if missing) */
 .header-profile {
+=======
+/* Theme variables */
+:root{
+  --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+  --glass: rgba(15,23,42,0.94);
+  --glass-soft: rgba(15,23,42,0.84);
+  --border-strong: rgba(148,163,184,0.28);
+  --border-soft: rgba(51,65,85,0.7);
+  --accent: #6366f1;
+  --muted: #94a3b8;
+}
+
+/* Page */
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:#e6eef8;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow:hidden; /* keep page fixed; notes container scrolls */
+}
+
+/* NeonVault wordmark (CSS) */
+.neon-wordmark {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+.neon-mark {
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  display:inline-grid;
+  place-items:center;
+  font-weight:800;
+  font-size:18px;
+  color:transparent;
+  background: linear-gradient(135deg, #7dd3fc 0%, #c084fc 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 6px 18px rgba(99,102,241,0.12));
+  box-shadow: 0 6px 18px rgba(2,6,23,0.45), inset 0 -6px 18px rgba(255,255,255,0.02);
+}
+
+/* Wordmark text */
+.neon-word {
+  font-weight:700;
+  font-size:18px;
+  line-height:1;
+  color:transparent;
+  background: linear-gradient(90deg, #7dd3fc 0%, #c084fc 45%, #a78bfa 70%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.02),
+    0 6px 18px rgba(99,102,241,0.08),
+    0 12px 40px rgba(99,102,241,0.06);
+  letter-spacing: -0.02em;
+}
+
+/* Tagline */
+.neon-tag {
+  font-size:11px;
+  color:rgba(230,238,248,0.7);
+  margin-top:2px;
+  display:block;
+}
+
+/* Compact mark for very small screens */
+.neon-compact {
+  display:none;
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.06));
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  color:transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-image: linear-gradient(90deg,#7dd3fc,#c084fc);
+}
+
+/* Responsive swaps */
+@media (max-width: 720px) {
+  .neon-word { display:none; }
+  .neon-tag { display:none; }
+  .neon-mark { display:none; }
+  .neon-compact { display:inline-grid; place-items:center; font-size:16px; }
+}
+
+
+/* App shell */
+.app-shell {
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Main container — WIDER */
+.main-container {
+  flex:1 1 auto;
+  overflow:hidden;
+}
+
+/* Wider max width: use more of the screen on large displays */
+.container-wide {
+  max-width: 1400px; /* increased from 6xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+/* Glass surfaces */
+.glass{
+  background:var(--glass);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border-strong);
+}
+.glass-soft{
+  background:var(--glass-soft);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-soft);
+}
+
+/* Header avatar */
+.header-avatar {
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  object-fit:cover;
+  border:1px solid rgba(148,163,184,0.12);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Toast container */
+#toastContainer {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:flex-end;
+  pointer-events:none;
+  width:460px;
+  max-width:calc(100% - 32px);
+  padding:0 8px;
+}
+
+/* Toast card */
+.nv-toast {
+  pointer-events:auto;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px 14px;
+  border-radius:12px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  max-width:460px;
+  width:100%;
+  cursor:pointer;
+  transform-origin:right bottom;
+  transition:transform .18s ease, opacity .18s ease;
+  opacity:1;
+  overflow:hidden;
+  position:relative;
+}
+.nv-toast .nv-icon {
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-size:18px;
+}
+.nv-toast .nv-body {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+.nv-toast .nv-title {
+  font-weight:700;
+  font-size:14px;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.nv-toast .nv-sub {
+  font-size:13px;
+  color:rgba(230,238,248,0.95);
+  opacity:0.95;
+  line-height:1.15;
+  max-height:4.2em;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Toast progress bar */
+.nv-progress {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  border-bottom-left-radius:12px;
+  border-bottom-right-radius:12px;
+  overflow:hidden;
+}
+.nv-progress > i {
+  display:block;
+  height:100%;
+  width:100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06));
+  transform-origin:left center;
+  transform: scaleX(1);
+  transition: transform linear;
+}
+
+/* Types */
+.nv-success { background: linear-gradient(180deg,#065f46,#064e3b); border:1px solid rgba(16,185,129,0.12); }
+.nv-success .nv-icon { background: rgba(16,185,129,0.12); color:#bbf7d0; }
+.nv-warning { background: linear-gradient(180deg,#92400e,#b45309); border:1px solid rgba(245,158,11,0.12); }
+.nv-warning .nv-icon { background: rgba(245,158,11,0.12); color:#fde68a; }
+.nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
+.nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
+
+/* Notes container: scroll only this area */
+#notesContainer {
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  max-height: calc(100vh - 320px);
+  padding-right:6px;
+}
+
+/* Trash button */
+.trash-btn {
+>>>>>>> parent of 29c839e (Updated css/js to make settings work better)
   display:inline-flex;
   align-items:center;
   gap:12px;
@@ -62,6 +311,7 @@ input, textarea, .btn-ghost {
   border: 1px solid var(--nv-profile-border);
   box-shadow: 0 6px 18px rgba(2,6,23,0.12);
 }
+<<<<<<< HEAD
 .header-profile .profile-meta { display:flex; flex-direction:column; gap:2px; }
 .header-profile .profile-name { font-weight:700; color:var(--nv-text); }
 .header-profile .logout-btn {
@@ -72,6 +322,21 @@ input, textarea, .btn-ghost {
 :focus { outline: 2px solid rgba(99,102,241,0.18); outline-offset: 2px; }
 
 /* small responsive tweak for notes container */
+=======
+.trash-btn:hover { transform: translateY(-1px); }
+
+/* Notes scrollbar */
+#notesContainer::-webkit-scrollbar { width:8px; height:8px; }
+#notesContainer::-webkit-scrollbar-thumb { background: rgba(71,85,105,0.6); border-radius:999px; }
+
+/* Modal overlay */
+.nv-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); }
+
+/* Small utilities */
+.nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
+
+/* Responsive tweaks */
+>>>>>>> parent of 29c839e (Updated css/js to make settings work better)
 @media (max-width: 1200px) {
   #notesContainer { max-height: calc(100vh - 360px); }
 }
