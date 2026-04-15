@@ -1,83 +1,103 @@
-/* NeonVault Global */
+/* styles.css — NeonVault custom styles */
 
-:root {
-  --nv-bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-  --nv-glass: rgba(15, 23, 42, 0.9);
-  --nv-glass-soft: rgba(15, 23, 42, 0.8);
-  --nv-border-strong: rgba(148, 163, 184, 0.35);
-  --nv-border-soft: rgba(51, 65, 85, 0.8);
+/* Theme variables */
+:root{
+  --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+  --glass: rgba(15,23,42,0.92);
+  --glass-soft: rgba(15,23,42,0.82);
+  --border-strong: rgba(148,163,184,0.28);
+  --border-soft: rgba(51,65,85,0.7);
+  --accent: #6366f1;
 }
 
-body {
-  background: var(--nv-bg);
-  color: #e5e7eb;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
+/* Page */
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:#e6eef8;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-/* Glass */
-
-.glass {
-  background: var(--nv-glass);
+/* Glass surfaces */
+.glass{
+  background:var(--glass);
   backdrop-filter: blur(18px);
-  border: 1px solid var(--nv-border-strong);
+  border: 1px solid var(--border-strong);
+}
+.glass-soft{
+  background:var(--glass-soft);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-soft);
 }
 
-.glass-soft {
-  background: var(--nv-glass-soft);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--nv-border-soft);
+/* Toasts: container handled in HTML; individual toast styles below */
+.nv-toast {
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px 14px;
+  border-radius:12px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  max-width:360px;
+  cursor:pointer;
+  transform-origin:right bottom;
+  transition:transform .18s ease, opacity .18s ease;
+  opacity:1;
+}
+.nv-toast .nv-icon {
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-size:18px;
+}
+.nv-toast .nv-body {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.nv-toast .nv-title {
+  font-weight:600;
+  font-size:14px;
+  color:var(--nv-title, #fff);
+}
+.nv-toast .nv-sub {
+  font-size:12px;
+  color:var(--nv-sub, #e6eef8);
+  opacity:.9;
 }
 
-/* Toasts */
+/* Types */
+.nv-success { background: linear-gradient(180deg,#064e3b,#065f46); border:1px solid rgba(16,185,129,0.12); }
+.nv-success .nv-icon { background: rgba(16,185,129,0.12); color:#bbf7d0; }
+.nv-warning { background: linear-gradient(180deg,#92400e,#b45309); border:1px solid rgba(245,158,11,0.12); }
+.nv-warning .nv-icon { background: rgba(245,158,11,0.12); color:#fde68a; }
+.nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
+.nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
 
-.toast {
-  animation: nv-slide-in 0.35s ease forwards;
-}
-
+/* Animations */
 @keyframes nv-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity:0; transform: translateY(10px) scale(.98); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
 }
+@keyframes nv-slide-out {
+  from { opacity:1; transform: translateY(0) scale(1); }
+  to   { opacity:0; transform: translateY(10px) scale(.98); }
+}
+.nv-animate-in { animation: nv-slide-in .32s cubic-bezier(.2,.9,.2,1) both; }
+.nv-animate-out { animation: nv-slide-out .22s ease both; }
 
-.toast-hide {
-  opacity: 0 !important;
-  transform: translateY(10px) scale(0.95) !important;
-  transition: all 0.25s ease;
-}
-
-/* Scrollbars */
-
-#notesContainer::-webkit-scrollbar {
-  width: 6px;
-}
-#notesContainer::-webkit-scrollbar-track {
-  background: transparent;
-}
-#notesContainer::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.9);
-  border-radius: 999px;
-}
+/* Notes scrollbar */
+#notesContainer::-webkit-scrollbar { width:8px; height:8px; }
+#notesContainer::-webkit-scrollbar-thumb { background: rgba(71,85,105,0.6); border-radius:999px; }
 
 /* Modal overlay */
+.nv-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); }
 
-.nv-overlay {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px);
-}
-
-/* Utility */
-
-.nv-badge {
-  border-radius: 999px;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
+/* Small utilities */
+.nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
