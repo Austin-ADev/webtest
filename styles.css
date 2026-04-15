@@ -1,7 +1,8 @@
 /* styles.css — NeonVault custom styles (wider layout) */
 
-/* Theme variables */
+/* Theme and density variables */
 :root{
+  --nv-density-scale: 1;
   --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
   --glass: rgba(15,23,42,0.94);
   --glass-soft: rgba(15,23,42,0.84);
@@ -9,6 +10,20 @@
   --border-soft: rgba(51,65,85,0.7);
   --accent: #6366f1;
   --muted: #94a3b8;
+  --text: #e6eef8;
+}
+
+/* Light theme overrides */
+body.nv-light-theme {
+  --bg: linear-gradient(180deg,#f6f8fb 0%, #eef2f7 60%);
+  --glass: rgba(255,255,255,0.86);
+  --glass-soft: rgba(255,255,255,0.94);
+  --border-strong: rgba(15,23,42,0.06);
+  --border-soft: rgba(15,23,42,0.08);
+  --accent: #4f46e5;
+  --muted: #475569;
+  --text: #0b1220;
+  color-scheme: light;
 }
 
 /* Page */
@@ -16,11 +31,23 @@ html,body{
   height:100%;
   margin:0;
   background:var(--bg);
-  color:#e6eef8;
+  color:var(--text);
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   overflow:hidden; /* keep page fixed; notes container scrolls */
+}
+
+/* Density variables */
+:root{
+  --nv-base-font: calc(14px * var(--nv-density-scale));
+  --nv-base-padding: calc(16px * var(--nv-density-scale));
+  --nv-card-padding: calc(24px * var(--nv-density-scale));
+}
+
+/* Smooth transitions for theme/density changes */
+* {
+  transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease;
 }
 
 /* NeonVault wordmark (CSS) */
@@ -96,7 +123,6 @@ html,body{
   .neon-compact { display:inline-grid; place-items:center; font-size:16px; }
 }
 
-
 /* App shell */
 .app-shell {
   height:100vh;
@@ -125,17 +151,19 @@ html,body{
   background:var(--glass);
   backdrop-filter: blur(18px);
   border: 1px solid var(--border-strong);
+  padding: var(--nv-card-padding);
 }
 .glass-soft{
   background:var(--glass-soft);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-soft);
+  padding: var(--nv-card-padding);
 }
 
 /* Header avatar */
 .header-avatar {
-  width:44px;
-  height:44px;
+  width:calc(44px * var(--nv-density-scale));
+  height:calc(44px * var(--nv-density-scale));
   border-radius:999px;
   object-fit:cover;
   border:1px solid rgba(148,163,184,0.12);
@@ -191,7 +219,7 @@ html,body{
 .nv-toast .nv-title {
   font-weight:700;
   font-size:14px;
-  color:#fff;
+  color:var(--text);
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -268,6 +296,15 @@ html,body{
 
 /* Small utilities */
 .nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
+
+/* Compact class tweaks */
+body.nv-compact .glass,
+body.nv-compact .glass-soft {
+  padding: calc(14px * var(--nv-density-scale));
+}
+body.nv-compact .neon-word {
+  font-size: calc(18px * var(--nv-density-scale));
+}
 
 /* Responsive tweaks */
 @media (max-width: 1200px) {
