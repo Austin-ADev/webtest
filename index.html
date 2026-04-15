@@ -522,6 +522,19 @@
     document.body.classList.remove("nv-light-theme");
   }
 
+  // After toggling nv-light-theme
+if (settings.theme === "light") {
+  // ensure icon fills adapt
+  document.querySelectorAll('svg').forEach(sv => {
+    sv.style.filter = 'invert(0)'; // keep icons dark on light bg
+  });
+} else {
+  document.querySelectorAll('svg').forEach(sv => {
+    sv.style.filter = ''; // reset
+  });
+}
+
+
   // Density: toggle compact class and set density scale variable
   if (settings.uiDensity === "compact") {
     document.body.classList.add("nv-compact");

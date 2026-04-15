@@ -1,6 +1,6 @@
-/* styles.css — NeonVault custom styles (wider layout) */
+/* styles.css — NeonVault custom styles (combined, with improved light theme & density) */
 
-/* Theme and density variables */
+/* Theme and density variables (defaults) */
 :root{
   --nv-density-scale: 1;
   --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
@@ -18,20 +18,27 @@
   --nv-card-padding: calc(24px * var(--nv-density-scale));
 }
 
-/* Light theme overrides */
+/* Improved Light Theme (replace/override defaults when body.nv-light-theme is present) */
 body.nv-light-theme {
-  --bg: linear-gradient(180deg,#f6f8fb 0%, #eef2f7 60%);
-  --glass: rgba(255,255,255,0.86);
-  --glass-soft: rgba(255,255,255,0.94);
+  --bg: linear-gradient(180deg,#f7f8fb 0%, #f3f6fa 50%, #eef2f7 100%);
+  --glass: rgba(255,255,255,0.92);
+  --glass-soft: rgba(250,250,252,0.96);
   --border-strong: rgba(15,23,42,0.06);
-  --border-soft: rgba(15,23,42,0.08);
+  --border-soft: rgba(15,23,42,0.04);
   --accent: #4f46e5;
-  --muted: #475569;
-  --text: #0b1220;
+  --muted: #55606a;
+  --text: #0f1724;
+  --surface-elev: rgba(2,6,23,0.04);
+
+  /* Toast colors (softer) */
+  --toast-success-bg: linear-gradient(180deg,#0f5132,#0b3f2a);
+  --toast-warning-bg: linear-gradient(180deg,#7a4b0f,#9a5b12);
+  --toast-error-bg: linear-gradient(180deg,#7b1f1f,#8f2b2b);
+
   color-scheme: light;
 }
 
-/* Page */
+/* Page base */
 html,body{
   height:100%;
   margin:0;
@@ -46,7 +53,7 @@ html,body{
 
 /* Smooth transitions for theme/density changes */
 * {
-  transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease;
+  transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease, box-shadow .18s ease;
 }
 
 /* NeonVault wordmark (CSS) */
@@ -138,7 +145,7 @@ html,body{
 
 /* Wider max width: use more of the screen on large displays */
 .container-wide {
-  max-width: 1400px; /* increased from 6xl */
+  max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 28px;
@@ -152,6 +159,7 @@ html,body{
   border: 1px solid var(--border-strong);
   padding: var(--nv-card-padding);
   color: var(--text);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.35);
 }
 .glass-soft{
   background:var(--glass-soft);
@@ -159,6 +167,7 @@ html,body{
   border: 1px solid var(--border-soft);
   padding: var(--nv-card-padding);
   color: var(--text);
+  box-shadow: 0 8px 22px rgba(2,6,23,0.28);
 }
 
 /* Header avatar */
@@ -257,13 +266,18 @@ html,body{
   transition: transform linear;
 }
 
-/* Types */
+/* Toast types (default dark theme) */
 .nv-success { background: linear-gradient(180deg,#065f46,#064e3b); border:1px solid rgba(16,185,129,0.12); }
 .nv-success .nv-icon { background: rgba(16,185,129,0.12); color:#bbf7d0; }
 .nv-warning { background: linear-gradient(180deg,#92400e,#b45309); border:1px solid rgba(245,158,11,0.12); }
 .nv-warning .nv-icon { background: rgba(245,158,11,0.12); color:#fde68a; }
 .nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
 .nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
+
+/* Light-theme toast overrides (softer) */
+body.nv-light-theme .nv-success { background: var(--toast-success-bg); border-color: rgba(16,185,129,0.08); }
+body.nv-light-theme .nv-warning { background: var(--toast-warning-bg); border-color: rgba(245,158,11,0.08); }
+body.nv-light-theme .nv-error { background: var(--toast-error-bg); border-color: rgba(239,68,68,0.08); }
 
 /* Notes container: scroll only this area */
 #notesContainer {
@@ -288,6 +302,14 @@ html,body{
 }
 .trash-btn:hover { transform: translateY(-1px); }
 
+/* Light-theme trash button (less harsh) */
+body.nv-light-theme .trash-btn {
+  background: linear-gradient(180deg,#fff5f5,#fff1f1);
+  color: #7f1d1d;
+  border: 1px solid rgba(127,29,29,0.06);
+  box-shadow: 0 6px 14px rgba(2,6,23,0.03);
+}
+
 /* Notes scrollbar */
 #notesContainer::-webkit-scrollbar { width:8px; height:8px; }
 #notesContainer::-webkit-scrollbar-thumb { background: rgba(71,85,105,0.6); border-radius:999px; }
@@ -306,6 +328,56 @@ body.nv-compact .glass-soft {
 body.nv-compact .neon-word {
   font-size: calc(18px * var(--nv-density-scale));
 }
+
+/* Inputs and buttons adapt to theme */
+input, textarea, .btn-ghost {
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  border-color: var(--border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+input::placeholder, textarea::placeholder { color: rgba(230,238,248,0.45); }
+
+/* Light theme input/button tweaks */
+body.nv-light-theme input,
+body.nv-light-theme textarea,
+body.nv-light-theme .btn-ghost {
+  background: rgba(15,23,42,0.03);
+  color: var(--text);
+  border-color: var(--border-soft);
+}
+body.nv-light-theme input::placeholder,
+body.nv-light-theme textarea::placeholder {
+  color: rgba(15,23,42,0.35);
+}
+
+/* Primary button */
+.btn-primary {
+  background: linear-gradient(90deg,#6366f1,#7c3aed);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.08);
+}
+body.nv-light-theme .btn-primary {
+  background: linear-gradient(90deg,#4f46e5,#6d28d9);
+  box-shadow: 0 6px 18px rgba(79,70,229,0.06);
+}
+
+/* Divider style (used in login/search areas) */
+.divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; }
+.divider::before, .divider::after { content:""; flex:1; height:1px; background:rgba(148,163,184,0.04); border-radius:2px; }
+body.nv-light-theme .divider::before, body.nv-light-theme .divider::after { background: rgba(15,23,42,0.06); }
+
+/* Focus outlines */
+:focus { outline: 2px solid rgba(99,102,241,0.18); outline-offset: 2px; }
+body.nv-light-theme :focus { outline: 3px solid rgba(79,70,229,0.12); outline-offset: 2px; }
+
+/* Ensure neon wordmark adapts in light theme */
+body.nv-light-theme .neon-word { text-shadow: 0 6px 18px rgba(79,70,229,0.06); }
 
 /* Responsive tweaks */
 @media (max-width: 1200px) {
