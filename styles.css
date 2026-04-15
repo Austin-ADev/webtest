@@ -389,3 +389,85 @@ body.nv-light-theme .neon-word { text-shadow: 0 6px 18px rgba(79,70,229,0.06); }
   .container-wide { padding-left:14px; padding-right:14px; }
   #toastContainer { width: calc(100% - 28px); }
 }
+/* SOFT LIGHT THEME OVERRIDES — paste at end of styles.css */
+
+/* Gentle page background and card tint */
+body.nv-light-theme {
+  --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%) !important;
+  --glass: rgba(250,250,252,0.94) !important; /* slightly warm off-white */
+  --glass-soft: rgba(247,248,250,0.98) !important;
+  --text: #0f1724 !important; /* charcoal */
+  --muted: #5b6770 !important;
+  --accent: #5b4ce6 !important; /* muted indigo */
+  --surface-elev: rgba(2,6,23,0.03) !important;
+}
+
+/* Card background and border: low contrast, subtle radius */
+body.nv-light-theme .glass,
+body.nv-light-theme .glass-soft {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,250,252,0.96)) !important;
+  border: 1px solid rgba(15,23,42,0.04) !important;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.03) !important;
+  color: var(--text) !important;
+  border-radius: 12px !important;
+}
+
+/* Note rows: subtle card color so text reads comfortably */
+body.nv-light-theme #notesContainer > div > .flex-1,
+body.nv-light-theme .note-row,
+body.nv-light-theme .note-card {
+  background: rgba(245,246,248,0.9) !important;
+  border: 1px solid rgba(15,23,42,0.03) !important;
+  color: var(--text) !important;
+}
+
+/* Inputs: soft fill and clear focus */
+body.nv-light-theme input,
+body.nv-light-theme textarea {
+  background: rgba(15,23,42,0.03) !important;
+  border: 1px solid rgba(15,23,42,0.04) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+}
+body.nv-light-theme input:focus,
+body.nv-light-theme textarea:focus {
+  outline: 3px solid rgba(91,76,230,0.10) !important;
+  outline-offset: 2px !important;
+}
+
+/* Primary button: slightly softer gradient and smaller shadow */
+body.nv-light-theme .btn-primary {
+  background: linear-gradient(90deg,#5b4ce6 0%, #7a5df0 100%) !important;
+  box-shadow: 0 6px 14px rgba(91,76,230,0.06) !important;
+}
+
+/* Trash and destructive UI: muted, not screaming */
+body.nv-light-theme .trash-btn {
+  background: linear-gradient(180deg,#fff7f7,#fff3f3) !important;
+  color: #8b1f1f !important;
+  border: 1px solid rgba(139,31,31,0.06) !important;
+  box-shadow: 0 6px 12px rgba(2,6,23,0.02) !important;
+}
+
+/* Toasts: softer palettes */
+body.nv-light-theme .nv-success { background: linear-gradient(180deg,#0f5132,#0b3f2a) !important; }
+body.nv-light-theme .nv-warning { background: linear-gradient(180deg,#7a4b0f,#9a5b12) !important; }
+body.nv-light-theme .nv-error { background: linear-gradient(180deg,#7b1f1f,#8f2b2b) !important; }
+
+/* Tone down neon wordmark glow on light background */
+body.nv-light-theme .neon-word {
+  filter: none !important;
+  text-shadow: 0 6px 14px rgba(79,70,229,0.04) !important;
+}
+
+/* Reduce overall saturation of icons and svgs in light mode */
+body.nv-light-theme svg { opacity: 0.92 !important; filter: none !important; }
+
+/* Subtle divider color */
+body.nv-light-theme .divider::before,
+body.nv-light-theme .divider::after {
+  background: rgba(15,23,42,0.05) !important;
+}
+
+/* Make sure any inline backgrounds are reset so variables apply */
+body.nv-light-theme .glass[style] { background: none !important; }
