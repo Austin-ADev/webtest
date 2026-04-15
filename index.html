@@ -13,70 +13,69 @@
   <!-- Toast container -->
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
 
-  <div class="max-w-6xl mx-auto px-6 py-6 space-y-6">
+  <div class="app-shell">
+    <div class="max-w-6xl mx-auto px-6 py-6 space-y-6 main-container">
 
-    <!-- Header -->
-    <header class="glass rounded-3xl px-5 py-4 flex items-center justify-between shadow-xl">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
-          <span class="text-lg font-bold">NV</span>
-        </div>
-        <div>
-          <h1 class="text-lg font-semibold tracking-tight">NeonVault</h1>
-          <p class="text-xs text-slate-400">Modern, synced notes.</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-4">
-        <div class="hidden sm:flex flex-col items-end text-xs">
-          <span id="userName" class="font-medium text-slate-100"></span>
-          <span id="userEmail" class="text-slate-400"></span>
+      <!-- Header -->
+      <header class="glass rounded-3xl px-5 py-4 flex items-center justify-between shadow-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
+            <span class="text-lg font-bold">NV</span>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold tracking-tight">NeonVault</h1>
+            <p class="text-xs text-slate-400">Modern, synced notes.</p>
+          </div>
         </div>
 
-        <!-- Debug UID (visible on larger screens) -->
-        <div id="debugUid" class="hidden sm:block text-[11px] text-slate-500 ml-4"></div>
+        <div class="flex items-center gap-4">
+          <div class="hidden sm:flex flex-col items-end text-xs">
+            <span id="userName" class="font-medium text-slate-100"></span>
+            <span id="userEmail" class="text-slate-400"></span>
+          </div>
 
-        <button id="avatarBtn" class="relative">
-          <img id="userAvatar" src="" alt="avatar" class="header-avatar" />
-          <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-slate-900"></span>
-        </button>
-        <button id="logoutBtn" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
-      </div>
-    </header>
-
-    <!-- Top row -->
-    <section class="grid lg:grid-cols-[2fr,1.2fr] gap-4">
-      <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-slate-100">New note</h2>
-          <span class="nv-badge bg-slate-900/60 text-slate-300 border border-slate-700/60">Private</span>
+          <button id="avatarBtn" class="relative">
+            <img id="userAvatar" src="" alt="avatar" class="header-avatar" />
+            <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-slate-900"></span>
+          </button>
+          <button id="logoutBtn" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
         </div>
-        <textarea id="newNote" placeholder="Capture a thought..." class="w-full min-h-[90px] px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-        <div class="flex justify-between items-center">
-          <span class="text-xs text-slate-500">Synced to your account in real time.</span>
-          <button id="addNoteBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400">Add note</button>
-        </div>
-      </div>
+      </header>
 
-      <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
-          <span class="text-[10px] text-slate-500">Fuzzy search by content & time</span>
+      <!-- Top row -->
+      <section class="grid lg:grid-cols-[2fr,1.2fr] gap-4">
+        <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-100">New note</h2>
+            <span class="nv-badge bg-slate-900/60 text-slate-300 border border-slate-700/60">Private</span>
+          </div>
+          <textarea id="newNote" placeholder="Capture a thought..." class="w-full min-h-[90px] px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <div class="flex justify-between items-center">
+            <span class="text-xs text-slate-500">Synced to your account in real time.</span>
+            <button id="addNoteBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400">Add note</button>
+          </div>
         </div>
-        <input id="searchInput" type="text" placeholder="Search notes..." class="w-full px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        <p class="text-xs text-slate-500">Powered by Fuse.js — type loosely, we’ll find it.</p>
-      </div>
-    </section>
 
-    <!-- Notes list -->
-    <section class="glass rounded-3xl p-6 shadow-xl min-h-[60vh]">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold text-slate-100">Your notes</h2>
-        <span id="noteCount" class="text-xs text-slate-500"></span>
-      </div>
-      <div id="notesContainer" class="space-y-3 max-h-[70vh] overflow-y-auto pr-1"></div>
-      <p id="emptyState" class="text-xs text-slate-500 text-center py-6 hidden">No notes yet. Start by writing something above.</p>
-    </section>
+        <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
+            <span class="text-[10px] text-slate-500">Fuzzy search by content & time</span>
+          </div>
+          <input id="searchInput" type="text" placeholder="Search notes..." class="w-full px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <p class="text-xs text-slate-500">Powered by Fuse.js — type loosely, we’ll find it.</p>
+        </div>
+      </section>
+
+      <!-- Notes list -->
+      <section class="glass rounded-3xl p-6 shadow-xl min-h-[60vh]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-slate-100">Your notes</h2>
+          <span id="noteCount" class="text-xs text-slate-500"></span>
+        </div>
+        <div id="notesContainer" class="space-y-3 pr-1"></div>
+        <p id="emptyState" class="text-xs text-slate-500 text-center py-6 hidden">No notes yet. Start by writing something above.</p>
+      </section>
+    </div>
   </div>
 
   <!-- Settings modal -->
@@ -134,7 +133,6 @@
     const userAvatar = document.getElementById("userAvatar");
     const userNameEl = document.getElementById("userName");
     const userEmailEl = document.getElementById("userEmail");
-    const debugUidEl = document.getElementById("debugUid");
 
     const newNoteEl = document.getElementById("newNote");
     const addNoteBtn = document.getElementById("addNoteBtn");
@@ -154,32 +152,70 @@
     let fuse = null;
     let settings = { autoClear: true, confirmDelete: false };
 
-    /* Toast builder (title, subtitle, type, optional link) */
-    function createToast(title, subtitle = "", type = "info", link = null) {
+    /* Toast builder (title, subtitle, type, duration ms) — no index link shown */
+    function createToast(title, subtitle = "", type = "info", duration = null) {
+      // default durations per type
+      const defaults = { success: 7000, warning: 9000, error: 12000, info: 7000 };
+      const dur = duration == null ? (defaults[type] || 8000) : duration;
+
       const el = document.createElement("div");
       const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
       el.className = `nv-toast nv-animate-in ${typeClass}`;
+
       const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
       el.innerHTML = `
         <div class="nv-icon">${icon}</div>
         <div class="nv-body">
           <div class="nv-title">${title}</div>
           <div class="nv-sub">${subtitle}</div>
-          ${link ? `<a href="${link}" target="_blank" rel="noopener">Create index</a>` : ""}
         </div>
+        <div class="nv-progress"><i></i></div>
       `;
+
+      // progress handling
+      const progressBar = el.querySelector(".nv-progress > i");
+      let start = Date.now();
+      let remaining = dur;
+      let rafId = null;
+      function setProgress() {
+        const elapsed = Date.now() - start;
+        const pct = Math.max(0, 1 - elapsed / dur);
+        progressBar.style.transform = `scaleX(${pct})`;
+        if (pct > 0) rafId = requestAnimationFrame(setProgress);
+      }
+
+      rafId = requestAnimationFrame(setProgress);
+
+      // pause on hover
+      el.addEventListener("mouseenter", () => {
+        cancelAnimationFrame(rafId);
+        remaining = Math.max(0, dur - (Date.now() - start));
+      });
+      el.addEventListener("mouseleave", () => {
+        start = Date.now();
+        // set new duration to remaining so progress resumes correctly
+        dur = remaining;
+        rafId = requestAnimationFrame(setProgress);
+      });
+
+      // click to dismiss
       el.onclick = () => {
         el.classList.remove("nv-animate-in");
         el.classList.add("nv-animate-out");
+        cancelAnimationFrame(rafId);
         setTimeout(() => el.remove(), 220);
       };
+
       toastContainer.appendChild(el);
+
+      // auto-dismiss
       setTimeout(() => {
         if (document.body.contains(el)) {
           el.classList.add("nv-animate-out");
+          cancelAnimationFrame(rafId);
           setTimeout(() => el.remove(), 220);
         }
-      }, 4200);
+      }, dur + 200);
     }
 
     /* Settings persistence */
@@ -246,7 +282,7 @@
       }
     }
 
-    /* Render notes */
+    /* Render notes (no IDs shown; auto-save on blur; delete is trash icon) */
     function renderNotes() {
       const q = searchInput.value.trim();
       let list = allNotes;
@@ -268,29 +304,47 @@
         textEl.contentEditable = "true";
         textEl.textContent = note.text || "";
 
+        // track original text to avoid unnecessary writes
+        let originalText = textEl.textContent;
+
+        // auto-save on blur if changed
+        textEl.addEventListener("blur", async () => {
+          const newText = textEl.textContent || "";
+          if (newText === originalText) return;
+          originalText = newText;
+          try {
+            await updateDoc(doc(db, "notes", note.id), { text: newText });
+            createToast("Note saved", "Changes synced to the cloud", "success");
+          } catch (e) {
+            console.error("auto-save error", e);
+            createToast("Save failed", e.message || "Try again", "error");
+          }
+        });
+
+        // save on Enter (prevent newline)
+        textEl.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            ev.preventDefault();
+            textEl.blur();
+          }
+        });
+
         const meta = document.createElement("div");
         meta.className = "mt-1 text-[10px] text-slate-500 flex items-center gap-2";
-        meta.innerHTML = `<span>${timeAgo(note.created || Date.now())}</span><span class="w-1 h-1 rounded-full bg-slate-600"></span><span>ID: ${note.id.slice(0,6)}…</span>`;
+        meta.innerHTML = `<span>${timeAgo(note.created || Date.now())}</span>`;
 
         left.appendChild(textEl); left.appendChild(meta);
 
-        const right = document.createElement("div"); right.className = "flex flex-col gap-1";
-        const saveBtn = document.createElement("button");
-        saveBtn.className = "px-2 py-1 rounded-xl text-[10px] bg-emerald-500/90 hover:bg-emerald-400 text-white";
-        saveBtn.textContent = "Save";
+        const right = document.createElement("div"); right.className = "flex flex-col gap-1 items-end";
         const delBtn = document.createElement("button");
-        delBtn.className = "px-2 py-1 rounded-xl text-[10px] bg-red-500/90 hover:bg-red-400 text-white";
-        delBtn.textContent = "Delete";
-
-        saveBtn.onclick = async () => {
-          try {
-            await updateDoc(doc(db, "notes", note.id), { text: textEl.textContent || "" });
-            createToast("Note updated", "Saved to cloud", "success");
-          } catch (e) {
-            console.error("updateDoc error", e);
-            createToast("Update failed", e.message || "Try again", "error");
-          }
-        };
+        delBtn.className = "trash-btn";
+        delBtn.title = "Delete note";
+        delBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 1 1 0-2h3.1a1 1 0 0 1 .9-.6h2a1 1 0 0 1 .9.6h3.1a1 1 0 0 1 1 1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118z"/>
+          </svg>
+        `;
 
         delBtn.onclick = async () => {
           if (settings.confirmDelete) {
@@ -305,13 +359,13 @@
           }
         };
 
-        right.appendChild(saveBtn); right.appendChild(delBtn);
+        right.appendChild(delBtn);
         row.appendChild(left); row.appendChild(right);
         notesContainer.appendChild(row);
       });
     }
 
-    /* Subscribe notes with index-aware error handling */
+    /* Subscribe notes with index-aware error handling (no index link shown) */
     function subscribeNotes(user) {
       const notesRef = collection(db, "notes");
       const qNotes = query(notesRef, where("userId", "==", user.uid), orderBy("created", "desc"));
@@ -333,18 +387,8 @@
         (err) => {
           console.error("onSnapshot error:", err);
           const msg = err && err.message ? err.message : "Failed to load notes";
-          // extract first http(s) link if present (Firestore provides index link)
-          let indexLink = null;
-          try {
-            const urlMatch = msg.match(/https?:\/\/[^\s)]+/);
-            if (urlMatch) indexLink = urlMatch[0];
-          } catch (e) { /* ignore */ }
-
-          if (indexLink) {
-            createToast("Failed to load notes", "Query requires a composite index. Click to create it.", "error", indexLink);
-          } else {
-            createToast("Failed to load notes", msg, "error");
-          }
+          // intentionally do NOT surface the index creation link to users
+          createToast("Failed to load notes", msg, "error");
         }
       );
     }
@@ -357,8 +401,6 @@
       }
       currentUser = user;
       setUserUI(user);
-      // show debug uid so you can confirm it matches Firestore documents
-      if (debugUidEl) { debugUidEl.classList.remove("hidden"); debugUidEl.textContent = `uid: ${user.uid}`; }
       loadSettings();
       subscribeNotes(user);
     });

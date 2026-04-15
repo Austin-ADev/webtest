@@ -20,6 +20,21 @@ html,body{
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow:hidden; /* prevent whole-page scroll; notes container will scroll */
+}
+
+/* App shell: keeps header and top controls visible while notes scroll */
+.app-shell {
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* Main content area (centered) */
+.main-container {
+  flex:1 1 auto;
+  overflow:hidden;
 }
 
 /* Glass surfaces */
@@ -51,6 +66,9 @@ html,body{
   gap:12px;
   align-items:flex-end;
   pointer-events:none;
+  width:420px;
+  max-width:calc(100% - 32px);
+  padding:0 8px;
 }
 
 /* Toast card */
@@ -69,6 +87,7 @@ html,body{
   transition:transform .18s ease, opacity .18s ease;
   opacity:1;
   overflow:hidden;
+  position:relative;
 }
 .nv-toast .nv-icon {
   width:40px;
@@ -83,7 +102,7 @@ html,body{
 .nv-toast .nv-body {
   display:flex;
   flex-direction:column;
-  gap:4px;
+  gap:6px;
   min-width:0;
 }
 .nv-toast .nv-title {
@@ -99,9 +118,31 @@ html,body{
   color:rgba(230,238,248,0.95);
   opacity:0.95;
   line-height:1.15;
-  max-height:3.6em;
+  max-height:4.2em;
   overflow:hidden;
   text-overflow:ellipsis;
+}
+
+/* Toast progress bar (bottom) */
+.nv-progress {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:4px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  border-bottom-left-radius:12px;
+  border-bottom-right-radius:12px;
+  overflow:hidden;
+}
+.nv-progress > i {
+  display:block;
+  height:100%;
+  width:100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06));
+  transform-origin:left center;
+  transform: scaleX(1);
+  transition: transform linear;
 }
 
 /* Types */
@@ -112,7 +153,7 @@ html,body{
 .nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
 .nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
 
-/* Link inside toast */
+/* Link inside toast (we intentionally do not show index creation links) */
 .nv-toast a {
   color: rgba(255,255,255,0.95);
   text-decoration: underline;
@@ -121,17 +162,28 @@ html,body{
   display:inline-block;
 }
 
-/* Animations */
-@keyframes nv-slide-in {
-  from { opacity:0; transform: translateY(10px) scale(.98); }
-  to   { opacity:1; transform: translateY(0) scale(1); }
+/* Notes container: scroll only this area */
+#notesContainer {
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  max-height: calc(100vh - 320px); /* keeps notes area within viewport; adjusts with header/top rows */
+  padding-right:6px;
 }
-@keyframes nv-slide-out {
-  from { opacity:1; transform: translateY(0) scale(1); }
-  to   { opacity:0; transform: translateY(10px) scale(.98); }
+
+/* Trash button */
+.trash-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background: linear-gradient(180deg,#7f1d1d,#991b1b);
+  color:#fff;
+  border:1px solid rgba(239,68,68,0.12);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.45);
 }
-.nv-animate-in { animation: nv-slide-in .32s cubic-bezier(.2,.9,.2,1) both; }
-.nv-animate-out { animation: nv-slide-out .22s ease both; }
+.trash-btn:hover { transform: translateY(-1px); }
 
 /* Notes scrollbar */
 #notesContainer::-webkit-scrollbar { width:8px; height:8px; }
@@ -146,5 +198,6 @@ html,body{
 /* Responsive tweaks */
 @media (max-width: 900px) {
   .max-w-6xl { padding-left:20px; padding-right:20px; }
-  #toastContainer { right: 12px; left: auto; bottom: 12px; }
+  #toastContainer { right: 12px; left: auto; bottom: 12px; width: calc(100% - 24px); }
+  #notesContainer { max-height: calc(100vh - 360px); }
 }
