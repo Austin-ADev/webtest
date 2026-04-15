@@ -19,12 +19,16 @@
       <!-- Header -->
       <header class="glass rounded-3xl px-6 py-4 flex items-center justify-between shadow-xl">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
-            <span class="text-xl font-bold">NV</span>
-          </div>
-          <div>
-            <h1 class="text-xl font-semibold tracking-tight">NeonVault</h1>
-            <p class="text-sm text-slate-400">Modern, synced notes.</p>
+          <!-- NEW: CSS wordmark -->
+          <div class="neon-wordmark" aria-hidden="false" role="img" title="NeonVault">
+            <div class="neon-compact" aria-hidden="true">NV</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="neon-mark" aria-hidden="true">NV</div>
+              <div style="display:flex;flex-direction:column;line-height:1;">
+                <span class="neon-word">NeonVault</span>
+                <span class="neon-tag">Modern, synced notes.</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -78,7 +82,7 @@
     </div>
   </div>
 
-  <!-- Settings modal (unchanged) -->
+  <!-- Settings modal -->
   <div id="settingsOverlay" class="nv-overlay fixed inset-0 flex items-center justify-center z-40 hidden">
     <div class="glass-soft rounded-3xl w-full max-w-sm p-5 shadow-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -153,119 +157,96 @@
     let settings = { autoClear: true, confirmDelete: false };
 
     /* createToast with max 4 visible toasts */
-function createToast(title, subtitle = "", type = "info", duration = null) {
-  // default durations per type
-  const defaults = { success: 7000, warning: 9000, error: 12000, info: 7000 };
-  const dur = duration == null ? (defaults[type] || 8000) : duration;
+    function createToast(title, subtitle = "", type = "info", duration = null) {
+      const defaults = { success: 7000, warning: 9000, error: 12000, info: 7000 };
+      const dur = duration == null ? (defaults[type] || 8000) : duration;
+      const MAX_TOASTS = 4;
+      while (toastContainer.children.length >= MAX_TOASTS) {
+        const oldest = toastContainer.children[0];
+        if (!oldest) break;
+        oldest.classList.remove("nv-animate-in");
+        oldest.classList.add("nv-animate-out");
+        try { if (oldest._nvRaf) cancelAnimationFrame(oldest._nvRaf); } catch(e){}
+        setTimeout(() => { if (oldest && oldest.parentNode) oldest.remove(); }, 220);
+      }
 
-  // enforce max toasts
-  const MAX_TOASTS = 4;
-  // remove oldest toast if limit reached
-  while (toastContainer.children.length >= MAX_TOASTS) {
-    const oldest = toastContainer.children[0];
-    if (!oldest) break;
-    // animate out then remove
-    oldest.classList.remove("nv-animate-in");
-    oldest.classList.add("nv-animate-out");
-    // try to cancel any RAF stored on element
-    try { if (oldest._nvRaf) cancelAnimationFrame(oldest._nvRaf); } catch(e){}
-    setTimeout(() => {
-      if (oldest && oldest.parentNode) oldest.remove();
-    }, 220);
-  }
+      const el = document.createElement("div");
+      const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
+      el.className = `nv-toast nv-animate-in ${typeClass}`;
 
-  // build toast element
-  const el = document.createElement("div");
-  const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
-  el.className = `nv-toast nv-animate-in ${typeClass}`;
+      const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
+      el.innerHTML = `
+        <div class="nv-icon">${icon}</div>
+        <div class="nv-body">
+          <div class="nv-title">${title}</div>
+          <div class="nv-sub">${subtitle}</div>
+        </div>
+        <div class="nv-progress"><i></i></div>
+      `;
 
-  const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
-  el.innerHTML = `
-    <div class="nv-icon">${icon}</div>
-    <div class="nv-body">
-      <div class="nv-title">${title}</div>
-      <div class="nv-sub">${subtitle}</div>
-    </div>
-    <div class="nv-progress"><i></i></div>
-  `;
+      const progressBar = el.querySelector(".nv-progress > i");
+      let start = Date.now();
+      let remaining = dur;
+      let rafId = null;
+      let cancelled = false;
 
-  // progress handling
-  const progressBar = el.querySelector(".nv-progress > i");
-  let start = Date.now();
-  let remaining = dur;
-  let rafId = null;
-  let cancelled = false;
+      function setProgress() {
+        if (cancelled) return;
+        const elapsed = Date.now() - start;
+        const pct = Math.max(0, 1 - elapsed / dur);
+        progressBar.style.transform = `scaleX(${pct})`;
+        if (pct > 0) rafId = requestAnimationFrame(setProgress);
+      }
 
-  function setProgress() {
-    if (cancelled) return;
-    const elapsed = Date.now() - start;
-    const pct = Math.max(0, 1 - elapsed / dur);
-    progressBar.style.transform = `scaleX(${pct})`;
-    if (pct > 0) rafId = requestAnimationFrame(setProgress);
-  }
+      el._nvRaf = requestAnimationFrame(setProgress);
 
-  // attach raf id to element so we can cancel if removed early
-  el._nvRaf = requestAnimationFrame(setProgress);
+      el.addEventListener("mouseenter", () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        remaining = Math.max(0, dur - (Date.now() - start));
+      });
+      el.addEventListener("mouseleave", () => {
+        start = Date.now();
+        const newDur = remaining;
+        function resumeProgress() {
+          if (cancelled) return;
+          const elapsed = Date.now() - start;
+          const pct = Math.max(0, 1 - elapsed / newDur);
+          progressBar.style.transform = `scaleX(${pct})`;
+          if (pct > 0) rafId = requestAnimationFrame(resumeProgress);
+        }
+        rafId = requestAnimationFrame(resumeProgress);
+        el._nvRaf = rafId;
+      });
 
-  // pause on hover
-  el.addEventListener("mouseenter", () => {
-    if (rafId) cancelAnimationFrame(rafId);
-    remaining = Math.max(0, dur - (Date.now() - start));
-  });
-  el.addEventListener("mouseleave", () => {
-    start = Date.now();
-    // update dur to remaining so progress resumes correctly
-    // (use local variable via closure)
-    const newDur = remaining;
-    // small wrapper to use newDur
-    function resumeProgress() {
-      if (cancelled) return;
-      const elapsed = Date.now() - start;
-      const pct = Math.max(0, 1 - elapsed / newDur);
-      progressBar.style.transform = `scaleX(${pct})`;
-      if (pct > 0) rafId = requestAnimationFrame(resumeProgress);
+      el.addEventListener("click", () => {
+        if (cancelled) return;
+        cancelled = true;
+        el.classList.remove("nv-animate-in");
+        el.classList.add("nv-animate-out");
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        setTimeout(() => { if (el && el.parentNode) el.remove(); }, 220);
+      });
+
+      toastContainer.appendChild(el);
+
+      const autoDismissTimer = setTimeout(() => {
+        if (cancelled) return;
+        cancelled = true;
+        el.classList.remove("nv-animate-in");
+        el.classList.add("nv-animate-out");
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        setTimeout(() => { if (el && el.parentNode) el.remove(); }, 220);
+      }, dur + 200);
+
+      el._nvCancel = () => {
+        cancelled = true;
+        clearTimeout(autoDismissTimer);
+        try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+        if (el && el.parentNode) el.remove();
+      };
+
+      return el;
     }
-    rafId = requestAnimationFrame(resumeProgress);
-    el._nvRaf = rafId;
-  });
-
-  // click to dismiss
-  el.addEventListener("click", () => {
-    if (cancelled) return;
-    cancelled = true;
-    el.classList.remove("nv-animate-in");
-    el.classList.add("nv-animate-out");
-    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
-    setTimeout(() => {
-      if (el && el.parentNode) el.remove();
-    }, 220);
-  });
-
-  // append and auto-dismiss
-  toastContainer.appendChild(el);
-
-  const autoDismissTimer = setTimeout(() => {
-    if (cancelled) return;
-    cancelled = true;
-    el.classList.remove("nv-animate-in");
-    el.classList.add("nv-animate-out");
-    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
-    setTimeout(() => {
-      if (el && el.parentNode) el.remove();
-    }, 220);
-  }, dur + 200);
-
-  // store references for external cleanup if needed
-  el._nvCancel = () => {
-    cancelled = true;
-    clearTimeout(autoDismissTimer);
-    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
-    if (el && el.parentNode) el.remove();
-  };
-
-  return el;
-}
-
 
     /* Settings persistence */
     function loadSettings() {
@@ -353,10 +334,8 @@ function createToast(title, subtitle = "", type = "info", duration = null) {
         textEl.contentEditable = "true";
         textEl.textContent = note.text || "";
 
-        // track original text to avoid unnecessary writes
         let originalText = textEl.textContent;
 
-        // auto-save on blur if changed
         textEl.addEventListener("blur", async () => {
           const newText = textEl.textContent || "";
           if (newText === originalText) return;
@@ -370,7 +349,6 @@ function createToast(title, subtitle = "", type = "info", duration = null) {
           }
         });
 
-        // save on Enter (prevent newline)
         textEl.addEventListener("keydown", (ev) => {
           if (ev.key === "Enter") {
             ev.preventDefault();
@@ -436,7 +414,6 @@ function createToast(title, subtitle = "", type = "info", duration = null) {
         (err) => {
           console.error("onSnapshot error:", err);
           const msg = err && err.message ? err.message : "Failed to load notes";
-          // intentionally do NOT surface the index creation link to users
           createToast("Failed to load notes", msg, "error");
         }
       );
