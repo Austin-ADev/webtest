@@ -510,35 +510,43 @@
     }
 
     function applySettings() {
-      // Toast container position
-      const pos = settings.toastPosition || "bottom-right";
-      toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
+  // Toast container position
+  const pos = settings.toastPosition || "bottom-right";
+  // reset classes then set new
+  toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
 
-      // Theme
-      if (settings.theme === "light") {
-        document.body.classList.add("nv-light-theme");
-      } else {
-        document.body.classList.remove("nv-light-theme");
-      }
+  // Theme: add/remove nv-light-theme on body
+  if (settings.theme === "light") {
+    document.body.classList.add("nv-light-theme");
+  } else {
+    document.body.classList.remove("nv-light-theme");
+  }
 
-      // UI density (simple scale)
-      if (settings.uiDensity === "compact") {
-        document.documentElement.style.setProperty("--nv-density-scale", "0.88");
-      } else {
-        document.documentElement.style.setProperty("--nv-density-scale", "1");
-      }
+  // Density: toggle compact class and set density scale variable
+  if (settings.uiDensity === "compact") {
+    document.body.classList.add("nv-compact");
+    document.documentElement.style.setProperty("--nv-density-scale", "0.88");
+  } else {
+    document.body.classList.remove("nv-compact");
+    document.documentElement.style.setProperty("--nv-density-scale", "1");
+  }
 
-      // Re-sort and render notes
-      if (allNotes && allNotes.length) {
-        allNotes.sort((a, b) => {
-          const aT = a.created || 0;
-          const bT = b.created || 0;
-          return settings.noteSort === "asc" ? aT - bT : bT - aT;
-        });
-        buildFuse();
-        renderNotes();
-      }
-    }
+  // Ensure toast max is available to createToast (no DOM change needed here)
+  // Re-sort and render notes according to settings.noteSort
+  if (allNotes && allNotes.length) {
+    allNotes.sort((a, b) => {
+      const aT = a.created || 0;
+      const bT = b.created || 0;
+      return settings.noteSort === "asc" ? aT - bT : bT - aT;
+    });
+    buildFuse();
+    renderNotes();
+  } else {
+    // still apply visual changes even if no notes
+    renderNotes();
+  }
+}
+
 
     /* Hook up settings buttons */
     saveSettingsBtn.addEventListener("click", () => {
