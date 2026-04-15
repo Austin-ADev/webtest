@@ -11,6 +11,11 @@
   --accent: #6366f1;
   --muted: #94a3b8;
   --text: #e6eef8;
+
+  /* Density-derived variables (default) */
+  --nv-base-font: calc(14px * var(--nv-density-scale));
+  --nv-base-padding: calc(16px * var(--nv-density-scale));
+  --nv-card-padding: calc(24px * var(--nv-density-scale));
 }
 
 /* Light theme overrides */
@@ -36,13 +41,7 @@ html,body{
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   overflow:hidden; /* keep page fixed; notes container scrolls */
-}
-
-/* Density variables */
-:root{
-  --nv-base-font: calc(14px * var(--nv-density-scale));
-  --nv-base-padding: calc(16px * var(--nv-density-scale));
-  --nv-card-padding: calc(24px * var(--nv-density-scale));
+  font-size: var(--nv-base-font);
 }
 
 /* Smooth transitions for theme/density changes */
@@ -152,12 +151,14 @@ html,body{
   backdrop-filter: blur(18px);
   border: 1px solid var(--border-strong);
   padding: var(--nv-card-padding);
+  color: var(--text);
 }
 .glass-soft{
   background:var(--glass-soft);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-soft);
   padding: var(--nv-card-padding);
+  color: var(--text);
 }
 
 /* Header avatar */
