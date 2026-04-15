@@ -9,25 +9,25 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     body { font-family: 'Inter', system-ui, sans-serif; }
-    .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(24px); border: 1px solid rgba(148, 163, 184, 0.25); }
-    .note-card { transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
-    .note-card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.2); }
+    .glass { background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(24px); border: 1px solid rgba(148, 163, 184, 0.25); }
+    .note-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .note-card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.25); }
+    .toast { animation: slideUp 0.3s ease, slideDown 0.3s 2.5s ease forwards; }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideDown { to { transform: translateY(30px); opacity: 0; } }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-zinc-950 to-slate-900 text-white">
 
-  <!-- Top Navigation -->
+  <!-- Header -->
   <nav class="glass border-b border-white/10 fixed top-0 left-0 right-0 z-50">
     <div class="max-w-6xl mx-auto px-8 py-5 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <h1 class="text-3xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">NeonVault</h1>
-      </div>
-
+      <h1 class="text-3xl font-bold tracking-tighter bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">NeonVault</h1>
+      
       <div class="flex items-center gap-6">
-        <button onclick="showSettings()" 
-          class="flex items-center gap-3 hover:bg-white/10 px-5 py-2.5 rounded-3xl transition">
+        <button onclick="showSettingsModal()" class="flex items-center gap-3 hover:bg-white/10 px-5 py-2.5 rounded-3xl transition">
           <img id="avatar" class="w-9 h-9 rounded-2xl object-cover ring-2 ring-blue-400/30" src="">
-          <div class="text-left">
+          <div>
             <p id="display-name" class="font-semibold text-sm"></p>
             <p id="display-email" class="text-xs text-slate-400"></p>
           </div>
@@ -37,59 +37,57 @@
     </div>
   </nav>
 
-  <div class="max-w-6xl mx-auto pt-28 px-8">
+  <div class="max-w-6xl mx-auto pt-28 px-8 pb-12">
     <div class="glass rounded-3xl p-10">
       <div class="flex justify-between items-center mb-10">
         <h2 class="text-4xl font-semibold flex items-center gap-4">
           <i class="fas fa-sticky-note text-blue-400"></i> My Notes
         </h2>
-        <input id="search" onkeyup="filterNotes()" placeholder="Search your notes..." 
+        <input id="search-input" onkeyup="filterNotes()" placeholder="Search notes..." 
           class="bg-zinc-900 border border-zinc-700 focus:border-blue-500 rounded-3xl px-6 py-3 w-96 outline-none text-lg">
       </div>
 
       <div class="flex gap-4 mb-12">
-        <input id="new-note" placeholder="Write something..." 
+        <input id="new-note-input" placeholder="Write a new note..." 
           class="flex-1 bg-zinc-900 border border-zinc-700 rounded-3xl px-7 py-5 text-lg focus:outline-none focus:border-emerald-500">
         <button onclick="addNote()" 
           class="bg-emerald-600 hover:bg-emerald-700 px-12 rounded-3xl font-semibold text-lg transition">Add Note</button>
       </div>
 
-      <div id="notes-list" class="space-y-6"></div>
+      <div id="notes-list" class="space-y-6 min-h-[400px]"></div>
     </div>
   </div>
 
   <!-- Settings Modal -->
-  <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
-    <div class="glass rounded-3xl w-full max-w-lg mx-6 p-10">
-      <div class="flex justify-between items-center mb-8">
+  <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]" onclick="if(event.target.id==='settings-modal') hideSettingsModal()">
+    <div onclick="event.stopImmediatePropagation()" class="glass rounded-3xl w-full max-w-lg mx-6 p-10">
+      <div class="flex justify-between mb-8">
         <h3 class="text-3xl font-semibold">Settings</h3>
-        <button onclick="hideSettings()" class="text-3xl text-slate-400 hover:text-white">×</button>
+        <button onclick="hideSettingsModal()" class="text-3xl leading-none text-slate-400 hover:text-white">×</button>
       </div>
 
       <div class="space-y-8">
         <div class="flex justify-between items-center">
           <div>
-            <p class="font-medium">Auto-clear input</p>
-            <p class="text-sm text-slate-400">Clear field after adding note</p>
+            <p class="font-medium">Auto-clear input after adding</p>
+            <p class="text-sm text-slate-400">Clear the field automatically</p>
           </div>
-          <input type="checkbox" id="auto-clear" checked class="w-6 h-6 accent-emerald-500">
+          <input type="checkbox" id="auto-clear-toggle" checked class="w-6 h-6 accent-emerald-500 cursor-pointer">
         </div>
         <div class="flex justify-between items-center">
           <div>
-            <p class="font-medium">Confirm before delete</p>
+            <p class="font-medium">Confirm before deleting notes</p>
             <p class="text-sm text-slate-400">Show confirmation dialog</p>
           </div>
-          <input type="checkbox" id="confirm-delete" class="w-6 h-6 accent-emerald-500">
+          <input type="checkbox" id="confirm-delete-toggle" class="w-6 h-6 accent-emerald-500 cursor-pointer">
         </div>
       </div>
 
-      <button onclick="hideSettings()" 
-        class="mt-12 w-full py-4 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-medium text-lg">Done</button>
+      <button onclick="hideSettingsModal()" class="mt-12 w-full py-4 bg-zinc-800 hover:bg-zinc-700 rounded-3xl font-medium text-lg transition">Save & Close</button>
     </div>
   </div>
 
   <script type="module">
-    // === YOUR FIREBASE CONFIG ===
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -109,9 +107,12 @@
 
     let currentUser = null;
     let allNotes = [];
+    let autoClear = true;
+    let confirmDelete = true;
 
+    // Auth state
     onAuthStateChanged(auth, (user) => {
-      if (!user) return location.href = "login.html";
+      if (!user) return window.location.href = "login.html";
 
       currentUser = user;
       document.getElementById("avatar").src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=3b82f6&color=fff`;
@@ -121,10 +122,25 @@
       loadNotes(user);
     });
 
+    function loadNotes(user) {
+      const q = query(collection(db, "notes"), orderBy("updatedAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        allNotes = snapshot.docs
+          .filter(d => d.data().userId === user.uid)
+          .map(d => ({ id: d.id, ...d.data() }));
+        renderNotes(allNotes);
+      }, (error) => {
+        console.error("Snapshot error:", error);
+        if (error.code === "permission-denied") {
+          showToast("Permission error. Check Firestore rules.", false);
+        }
+      });
+    }
+
     async function addNote() {
-      const input = document.getElementById("new-note");
+      const input = document.getElementById("new-note-input");
       const text = input.value.trim();
-      if (!text) return;
+      if (!text || !currentUser) return;
 
       try {
         await addDoc(collection(db, "notes"), {
@@ -133,31 +149,30 @@
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
-        input.value = "";
-        showToast("Note saved successfully");
+        showToast("Note added successfully ✨");
+        if (autoClear) input.value = "";
       } catch (e) {
-        showToast("Failed to save note", false);
+        console.error(e);
+        showToast("Failed to save note. Check rules.", false);
       }
-    }
-
-    function loadNotes(user) {
-      onSnapshot(query(collection(db, "notes"), orderBy("updatedAt", "desc")), (snap) => {
-        allNotes = snap.docs.filter(d => d.data().userId === user.uid).map(d => ({id: d.id, ...d.data()}));
-        renderNotes(allNotes);
-      });
     }
 
     function renderNotes(notes) {
       const container = document.getElementById("notes-list");
-      container.innerHTML = notes.length ? "" : `<p class="text-center py-16 text-slate-400">No notes yet. Start writing above.</p>`;
+      container.innerHTML = "";
+
+      if (notes.length === 0) {
+        container.innerHTML = `<p class="text-center py-16 text-slate-400">No notes yet. Write something above.</p>`;
+        return;
+      }
 
       notes.forEach(note => {
         const div = document.createElement("div");
         div.className = "note-card glass rounded-3xl p-8";
         div.innerHTML = `
-          <div contenteditable="true" onblur="updateNote('${note.id}', this.innerText)" 
-               class="text-slate-100 text-[17px] leading-relaxed outline-none min-h-[90px]">${note.text}</div>
-          <div class="mt-6 flex justify-between text-xs text-slate-400">
+          <div contenteditable="true" spellcheck="false" onblur="updateNote('${note.id}', this.innerText)" 
+            class="text-slate-100 text-lg leading-relaxed outline-none min-h-[90px]">${note.text}</div>
+          <div class="flex justify-between mt-6 text-xs text-slate-400">
             <span>${timeAgo(note.updatedAt || note.createdAt)}</span>
             <button onclick="deleteNote('${note.id}')" class="hover:text-red-400 transition"><i class="fas fa-trash"></i></button>
           </div>
@@ -166,41 +181,59 @@
       });
     }
 
-    window.updateNote = async (id, text) => {
-      if (!text.trim()) return;
-      await updateDoc(doc(db, "notes", id), { text: text.trim(), updatedAt: serverTimestamp() });
+    window.updateNote = async (id, newText) => {
+      if (!newText.trim()) return;
+      try {
+        await updateDoc(doc(db, "notes", id), { text: newText.trim(), updatedAt: serverTimestamp() });
+      } catch (e) { console.error(e); }
     };
 
     window.deleteNote = async (id) => {
-      if (!confirm("Delete this note permanently?")) return;
-      await deleteDoc(doc(db, "notes", id));
-      showToast("Note deleted");
+      if (confirmDelete && !confirm("Delete this note permanently?")) return;
+      try {
+        await deleteDoc(doc(db, "notes", id));
+        showToast("Note deleted");
+      } catch (e) {
+        showToast("Delete failed", false);
+      }
     };
 
     window.filterNotes = () => {
-      const term = document.getElementById("search").value.toLowerCase().trim();
+      const term = document.getElementById("search-input").value.toLowerCase().trim();
       const filtered = term ? allNotes.filter(n => n.text.toLowerCase().includes(term)) : allNotes;
       renderNotes(filtered);
     };
 
     function timeAgo(ts) {
       if (!ts) return "just now";
-      const s = Math.floor((Date.now() - ts.toMillis()) / 1000);
-      if (s < 60) return "just now";
-      if (s < 3600) return Math.floor(s/60) + "m ago";
-      return Math.floor(s/3600) + "h ago";
+      const seconds = Math.floor((Date.now() - ts.toMillis()) / 1000);
+      if (seconds < 60) return "just now";
+      if (seconds < 3600) return Math.floor(seconds/60) + "m ago";
+      return Math.floor(seconds/3600) + "h ago";
     }
 
-    function showToast(msg, success = true) {
-      const t = document.createElement("div");
-      t.style.cssText = `position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:9999px;color:white;z-index:9999;box-shadow:0 10px 15px -3px rgb(0 0 0);background:${success ? '#10b981' : '#ef4444'};`;
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 2800);
+    function showToast(message, success = true) {
+      const toast = document.createElement("div");
+      toast.className = `toast fixed bottom-6 right-6 glass px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 text-white z-[200]`;
+      toast.innerHTML = `
+        <i class="${success ? 'fas fa-check-circle text-emerald-400' : 'fas fa-exclamation-circle text-red-400'} text-xl"></i>
+        <span class="font-medium">${message}</span>
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
-    window.showSettings = () => document.getElementById("settings-modal").classList.remove("hidden");
-    window.hideSettings = () => document.getElementById("settings-modal").classList.add("hidden");
+    // Settings Modal
+    window.showSettingsModal = () => {
+      document.getElementById("settings-modal").classList.remove("hidden");
+    };
+
+    window.hideSettingsModal = () => {
+      document.getElementById("settings-modal").classList.add("hidden");
+      // Save settings (you can expand this later)
+      autoClear = document.getElementById("auto-clear-toggle").checked;
+      confirmDelete = document.getElementById("confirm-delete-toggle").checked;
+    };
 
     window.logout = () => signOut(auth);
   </script>
