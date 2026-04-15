@@ -12,9 +12,6 @@
     .glass { background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(24px); border: 1px solid rgba(148, 163, 184, 0.25); }
     .note-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .note-card:hover { transform: translateY(-6px); box-shadow: 0 20px 25px -5px rgb(59 130 246 / 0.25); }
-    .toast { animation: slideUp 0.3s ease, slideDown 0.3s 2.5s ease forwards; }
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideDown { to { transform: translateY(30px); opacity: 0; } }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-zinc-950 to-slate-900 text-white">
@@ -70,16 +67,16 @@
         <div class="flex justify-between items-center">
           <div>
             <p class="font-medium">Auto-clear input after adding</p>
-            <p class="text-sm text-slate-400">Clear the field automatically</p>
+            <p class="text-sm text-slate-400">Clear field automatically</p>
           </div>
           <input type="checkbox" id="auto-clear-toggle" checked class="w-6 h-6 accent-emerald-500 cursor-pointer">
         </div>
         <div class="flex justify-between items-center">
           <div>
-            <p class="font-medium">Confirm before deleting notes</p>
+            <p class="font-medium">Confirm before deleting</p>
             <p class="text-sm text-slate-400">Show confirmation dialog</p>
           </div>
-          <input type="checkbox" id="confirm-delete-toggle" class="w-6 h-6 accent-emerald-500 cursor-pointer">
+          <input type="checkbox" id="confirm-delete-toggle" checked class="w-6 h-6 accent-emerald-500 cursor-pointer">
         </div>
       </div>
 
@@ -107,10 +104,7 @@
 
     let currentUser = null;
     let allNotes = [];
-    let autoClear = true;
-    let confirmDelete = true;
 
-    // Auth state
     onAuthStateChanged(auth, (user) => {
       if (!user) return window.location.href = "login.html";
 
@@ -130,9 +124,11 @@
           .map(d => ({ id: d.id, ...d.data() }));
         renderNotes(allNotes);
       }, (error) => {
-        console.error("Snapshot error:", error);
+        console.error("Firestore error:", error);
         if (error.code === "permission-denied") {
-          showToast("Permission error. Check Firestore rules.", false);
+          showToast("Permission error. Double-check Firestore rules.", false);
+        } else {
+          showToast("Error loading notes", false);
         }
       });
     }
@@ -150,27 +146,22 @@
           updatedAt: serverTimestamp()
         });
         showToast("Note added successfully ✨");
-        if (autoClear) input.value = "";
+        input.value = "";
       } catch (e) {
         console.error(e);
-        showToast("Failed to save note. Check rules.", false);
+        showToast("Failed to save. Check Firestore rules.", false);
       }
     }
 
     function renderNotes(notes) {
       const container = document.getElementById("notes-list");
-      container.innerHTML = "";
-
-      if (notes.length === 0) {
-        container.innerHTML = `<p class="text-center py-16 text-slate-400">No notes yet. Write something above.</p>`;
-        return;
-      }
+      container.innerHTML = notes.length ? "" : `<p class="text-center py-16 text-slate-400">No notes yet. Write something above.</p>`;
 
       notes.forEach(note => {
         const div = document.createElement("div");
         div.className = "note-card glass rounded-3xl p-8";
         div.innerHTML = `
-          <div contenteditable="true" spellcheck="false" onblur="updateNote('${note.id}', this.innerText)" 
+          <div contenteditable="true" onblur="updateNote('${note.id}', this.innerText)" 
             class="text-slate-100 text-lg leading-relaxed outline-none min-h-[90px]">${note.text}</div>
           <div class="flex justify-between mt-6 text-xs text-slate-400">
             <span>${timeAgo(note.updatedAt || note.createdAt)}</span>
@@ -189,7 +180,7 @@
     };
 
     window.deleteNote = async (id) => {
-      if (confirmDelete && !confirm("Delete this note permanently?")) return;
+      if (!confirm("Delete this note permanently?")) return;
       try {
         await deleteDoc(doc(db, "notes", id));
         showToast("Note deleted");
@@ -214,26 +205,17 @@
 
     function showToast(message, success = true) {
       const toast = document.createElement("div");
-      toast.className = `toast fixed bottom-6 right-6 glass px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 text-white z-[200]`;
+      toast.className = `fixed bottom-6 right-6 glass px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 text-white z-[200]`;
       toast.innerHTML = `
         <i class="${success ? 'fas fa-check-circle text-emerald-400' : 'fas fa-exclamation-circle text-red-400'} text-xl"></i>
         <span class="font-medium">${message}</span>
       `;
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
+      setTimeout(() => toast.remove(), 2800);
     }
 
-    // Settings Modal
-    window.showSettingsModal = () => {
-      document.getElementById("settings-modal").classList.remove("hidden");
-    };
-
-    window.hideSettingsModal = () => {
-      document.getElementById("settings-modal").classList.add("hidden");
-      // Save settings (you can expand this later)
-      autoClear = document.getElementById("auto-clear-toggle").checked;
-      confirmDelete = document.getElementById("confirm-delete-toggle").checked;
-    };
+    window.showSettingsModal = () => document.getElementById("settings-modal").classList.remove("hidden");
+    window.hideSettingsModal = () => document.getElementById("settings-modal").classList.add("hidden");
 
     window.logout = () => signOut(auth);
   </script>
