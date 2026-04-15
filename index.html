@@ -253,17 +253,6 @@
               </select>
             </label>
           </div>
-
-          <label class="flex items-center justify-between gap-3">
-            <div>
-              <div class="text-sm text-slate-200">Theme</div>
-              <div class="text-xs text-slate-400">Dark or light UI</div>
-            </div>
-            <select id="themeSelect" class="bg-slate-900/60 border border-slate-700 text-slate-100 rounded px-2 py-1 text-xs">
-              <option value="dark">Dark</option>
-              <option value="light">Light</option>
-            </select>
-          </label>
         </div>
       </div>
 
@@ -514,26 +503,6 @@
   const pos = settings.toastPosition || "bottom-right";
   // reset classes then set new
   toastContainer.className = `fixed z-50 ${pos.includes("bottom") ? "bottom-6" : "top-6"} ${pos.includes("right") ? "right-6" : "left-6"}`;
-
-  // Theme: add/remove nv-light-theme on body
-  if (settings.theme === "light") {
-    document.body.classList.add("nv-light-theme");
-  } else {
-    document.body.classList.remove("nv-light-theme");
-  }
-
-  // After toggling nv-light-theme
-if (settings.theme === "light") {
-  // ensure icon fills adapt
-  document.querySelectorAll('svg').forEach(sv => {
-    sv.style.filter = 'invert(0)'; // keep icons dark on light bg
-  });
-} else {
-  document.querySelectorAll('svg').forEach(sv => {
-    sv.style.filter = ''; // reset
-  });
-}
-
 
   // Density: toggle compact class and set density scale variable
   if (settings.uiDensity === "compact") {
