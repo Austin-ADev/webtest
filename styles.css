@@ -1,4 +1,4 @@
-/* styles.css — NeonVault custom styles (combined, with improved light theme & density) */
+/* styles.css — NeonVault custom styles (final integrated, with improved light theme & density) */
 
 /* Theme and density variables (defaults) */
 :root{
@@ -18,17 +18,17 @@
   --nv-card-padding: calc(24px * var(--nv-density-scale));
 }
 
-/* Improved Light Theme (replace/override defaults when body.nv-light-theme is present) */
+/* Improved Light Theme (override defaults when body.nv-light-theme is present) */
 body.nv-light-theme {
-  --bg: linear-gradient(180deg,#f7f8fb 0%, #f3f6fa 50%, #eef2f7 100%);
-  --glass: rgba(255,255,255,0.92);
-  --glass-soft: rgba(250,250,252,0.96);
+  --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%);
+  --glass: rgba(250,250,252,0.94);
+  --glass-soft: rgba(247,248,250,0.98);
   --border-strong: rgba(15,23,42,0.06);
   --border-soft: rgba(15,23,42,0.04);
-  --accent: #4f46e5;
-  --muted: #55606a;
+  --accent: #5b4ce6;
+  --muted: #5b6770;
   --text: #0f1724;
-  --surface-elev: rgba(2,6,23,0.04);
+  --surface-elev: rgba(2,6,23,0.03);
 
   /* Toast colors (softer) */
   --toast-success-bg: linear-gradient(180deg,#0f5132,#0b3f2a);
@@ -363,7 +363,7 @@ body.nv-light-theme textarea::placeholder {
   box-shadow: 0 6px 18px rgba(99,102,241,0.08);
 }
 body.nv-light-theme .btn-primary {
-  background: linear-gradient(90deg,#4f46e5,#6d28d9);
+  background: linear-gradient(90deg,#5b4ce6,#7a5df0);
   box-shadow: 0 6px 18px rgba(79,70,229,0.06);
 }
 
@@ -389,16 +389,20 @@ body.nv-light-theme .neon-word { text-shadow: 0 6px 18px rgba(79,70,229,0.06); }
   .container-wide { padding-left:14px; padding-right:14px; }
   #toastContainer { width: calc(100% - 28px); }
 }
-/* SOFT LIGHT THEME OVERRIDES — paste at end of styles.css */
+
+/* ---------------------------
+   SOFT LIGHT THEME OVERRIDES
+   (stronger selectors placed at end to ensure they win)
+   --------------------------- */
 
 /* Gentle page background and card tint */
 body.nv-light-theme {
   --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%) !important;
-  --glass: rgba(250,250,252,0.94) !important; /* slightly warm off-white */
+  --glass: rgba(250,250,252,0.94) !important;
   --glass-soft: rgba(247,248,250,0.98) !important;
-  --text: #0f1724 !important; /* charcoal */
+  --text: #0f1724 !important;
   --muted: #5b6770 !important;
-  --accent: #5b4ce6 !important; /* muted indigo */
+  --accent: #5b4ce6 !important;
   --surface-elev: rgba(2,6,23,0.03) !important;
 }
 
