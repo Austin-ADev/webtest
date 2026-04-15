@@ -152,71 +152,120 @@
     let fuse = null;
     let settings = { autoClear: true, confirmDelete: false };
 
-    /* Toast builder (title, subtitle, type, duration ms) — no index link shown */
-    function createToast(title, subtitle = "", type = "info", duration = null) {
-      // default durations per type
-      const defaults = { success: 7000, warning: 9000, error: 12000, info: 7000 };
-      const dur = duration == null ? (defaults[type] || 8000) : duration;
+    /* createToast with max 4 visible toasts */
+function createToast(title, subtitle = "", type = "info", duration = null) {
+  // default durations per type
+  const defaults = { success: 7000, warning: 9000, error: 12000, info: 7000 };
+  const dur = duration == null ? (defaults[type] || 8000) : duration;
 
-      const el = document.createElement("div");
-      const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
-      el.className = `nv-toast nv-animate-in ${typeClass}`;
+  // enforce max toasts
+  const MAX_TOASTS = 4;
+  // remove oldest toast if limit reached
+  while (toastContainer.children.length >= MAX_TOASTS) {
+    const oldest = toastContainer.children[0];
+    if (!oldest) break;
+    // animate out then remove
+    oldest.classList.remove("nv-animate-in");
+    oldest.classList.add("nv-animate-out");
+    // try to cancel any RAF stored on element
+    try { if (oldest._nvRaf) cancelAnimationFrame(oldest._nvRaf); } catch(e){}
+    setTimeout(() => {
+      if (oldest && oldest.parentNode) oldest.remove();
+    }, 220);
+  }
 
-      const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
-      el.innerHTML = `
-        <div class="nv-icon">${icon}</div>
-        <div class="nv-body">
-          <div class="nv-title">${title}</div>
-          <div class="nv-sub">${subtitle}</div>
-        </div>
-        <div class="nv-progress"><i></i></div>
-      `;
+  // build toast element
+  const el = document.createElement("div");
+  const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
+  el.className = `nv-toast nv-animate-in ${typeClass}`;
 
-      // progress handling
-      const progressBar = el.querySelector(".nv-progress > i");
-      let start = Date.now();
-      let remaining = dur;
-      let rafId = null;
-      function setProgress() {
-        const elapsed = Date.now() - start;
-        const pct = Math.max(0, 1 - elapsed / dur);
-        progressBar.style.transform = `scaleX(${pct})`;
-        if (pct > 0) rafId = requestAnimationFrame(setProgress);
-      }
+  const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
+  el.innerHTML = `
+    <div class="nv-icon">${icon}</div>
+    <div class="nv-body">
+      <div class="nv-title">${title}</div>
+      <div class="nv-sub">${subtitle}</div>
+    </div>
+    <div class="nv-progress"><i></i></div>
+  `;
 
-      rafId = requestAnimationFrame(setProgress);
+  // progress handling
+  const progressBar = el.querySelector(".nv-progress > i");
+  let start = Date.now();
+  let remaining = dur;
+  let rafId = null;
+  let cancelled = false;
 
-      // pause on hover
-      el.addEventListener("mouseenter", () => {
-        cancelAnimationFrame(rafId);
-        remaining = Math.max(0, dur - (Date.now() - start));
-      });
-      el.addEventListener("mouseleave", () => {
-        start = Date.now();
-        // set new duration to remaining so progress resumes correctly
-        dur = remaining;
-        rafId = requestAnimationFrame(setProgress);
-      });
+  function setProgress() {
+    if (cancelled) return;
+    const elapsed = Date.now() - start;
+    const pct = Math.max(0, 1 - elapsed / dur);
+    progressBar.style.transform = `scaleX(${pct})`;
+    if (pct > 0) rafId = requestAnimationFrame(setProgress);
+  }
 
-      // click to dismiss
-      el.onclick = () => {
-        el.classList.remove("nv-animate-in");
-        el.classList.add("nv-animate-out");
-        cancelAnimationFrame(rafId);
-        setTimeout(() => el.remove(), 220);
-      };
+  // attach raf id to element so we can cancel if removed early
+  el._nvRaf = requestAnimationFrame(setProgress);
 
-      toastContainer.appendChild(el);
-
-      // auto-dismiss
-      setTimeout(() => {
-        if (document.body.contains(el)) {
-          el.classList.add("nv-animate-out");
-          cancelAnimationFrame(rafId);
-          setTimeout(() => el.remove(), 220);
-        }
-      }, dur + 200);
+  // pause on hover
+  el.addEventListener("mouseenter", () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    remaining = Math.max(0, dur - (Date.now() - start));
+  });
+  el.addEventListener("mouseleave", () => {
+    start = Date.now();
+    // update dur to remaining so progress resumes correctly
+    // (use local variable via closure)
+    const newDur = remaining;
+    // small wrapper to use newDur
+    function resumeProgress() {
+      if (cancelled) return;
+      const elapsed = Date.now() - start;
+      const pct = Math.max(0, 1 - elapsed / newDur);
+      progressBar.style.transform = `scaleX(${pct})`;
+      if (pct > 0) rafId = requestAnimationFrame(resumeProgress);
     }
+    rafId = requestAnimationFrame(resumeProgress);
+    el._nvRaf = rafId;
+  });
+
+  // click to dismiss
+  el.addEventListener("click", () => {
+    if (cancelled) return;
+    cancelled = true;
+    el.classList.remove("nv-animate-in");
+    el.classList.add("nv-animate-out");
+    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+    setTimeout(() => {
+      if (el && el.parentNode) el.remove();
+    }, 220);
+  });
+
+  // append and auto-dismiss
+  toastContainer.appendChild(el);
+
+  const autoDismissTimer = setTimeout(() => {
+    if (cancelled) return;
+    cancelled = true;
+    el.classList.remove("nv-animate-in");
+    el.classList.add("nv-animate-out");
+    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+    setTimeout(() => {
+      if (el && el.parentNode) el.remove();
+    }, 220);
+  }, dur + 200);
+
+  // store references for external cleanup if needed
+  el._nvCancel = () => {
+    cancelled = true;
+    clearTimeout(autoDismissTimer);
+    try { if (rafId) cancelAnimationFrame(rafId); } catch(e){}
+    if (el && el.parentNode) el.remove();
+  };
+
+  return el;
+}
+
 
     /* Settings persistence */
     function loadSettings() {
