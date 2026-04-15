@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 
-  <!-- Wordmark CSS: text-only NeonVault -->
+  <!-- Wordmark + small inline styles used by header/search -->
   <style>
     .neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
     .neon-word {
@@ -32,7 +32,7 @@
       display:block;
     }
 
-    /* small helper for the search filter preview */
+    /* Search filter pill */
     .search-filter-pill {
       display:inline-flex;
       gap:8px;
@@ -51,7 +51,35 @@
       opacity:0.9;
       cursor:pointer;
       padding:0;
+      margin-left:8px;
     }
+
+    /* Search input wrapper with clear button */
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-input-wrap input[type="text"] {
+      padding-right: 44px;
+    }
+    .search-clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.85);
+      cursor: pointer;
+      width:28px;
+      height:28px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+    }
+    .search-clear-btn:hover { background: rgba(255,255,255,0.03); }
 
     @media (max-width: 640px) {
       .neon-word { font-size:16px; }
@@ -115,7 +143,10 @@
 
           <!-- Search input + filter preview -->
           <div id="searchBox" class="space-y-2">
-            <input id="searchInput" type="text" placeholder="Search notes... (try: d: 16 min ago)" class="w-full px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <div class="search-input-wrap">
+              <input id="searchInput" type="text" placeholder="Search notes... (try: d: 16 min ago)" class="w-full px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button id="searchClearBtn" class="search-clear-btn" title="Clear search" aria-label="Clear search">✕</button>
+            </div>
             <div id="searchFilterContainer" class="flex items-center gap-3"></div>
             <p class="text-xs text-slate-500">Tip: prefix with <code>d:</code> to filter by relative time (e.g. <code>d: 16 min ago</code>).</p>
           </div>
@@ -250,7 +281,7 @@
       getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    /* Inserted Firebase config (provided) */
+    /* Firebase config (provided) */
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -280,6 +311,7 @@
     const noteCount = document.getElementById("noteCount");
     const searchInput = document.getElementById("searchInput");
     const searchFilterContainer = document.getElementById("searchFilterContainer");
+    const searchClearBtn = document.getElementById("searchClearBtn");
 
     /* Settings controls */
     const autoClearToggle = document.getElementById("autoClearToggle");
@@ -570,66 +602,81 @@
       }
     }
 
-    /* Parse d: time filter from search string
-       Supported forms: d: 16 min ago | d:16min | d: 2 hr ago | d: 1 day ago
-       Returns {targetTs, toleranceMs, label} or null if not found.
-    */
+    /* Robust date filter parser */
     function parseDateFilter(q) {
       if (!q) return null;
-      const m = q.match(/d:\s*([0-9]+)\s*(min|mins|minute|minutes|m|hr|hrs|hour|hours|h|day|days|d)\b/i);
+      // Accept many variants: d:16 min ago | d:16min | d: 2 hr | d:2h | d:30m | d:1 day ago
+      const re = /d:\s*([0-9]+)\s*(min|mins|minute|minutes|m|h|hr|hrs|hour|hours|d|day|days)\b/i;
+      const m = q.match(re);
       if (!m) return null;
       const n = parseInt(m[1], 10);
-      const unit = m[2].toLowerCase();
+      const unitRaw = m[2].toLowerCase();
+
+      // normalize unit
+      let unit = "min";
+      if (unitRaw === "h" || unitRaw.startsWith("hr") || unitRaw.startsWith("hour")) unit = "hour";
+      if (unitRaw === "d" || unitRaw.startsWith("day")) unit = "day";
+
+      // compute ms and tolerance
       let ms = 0;
       let tol = 0;
-      if (unit.startsWith("min") || unit === "m") {
+      if (unit === "min") {
         ms = n * 60 * 1000;
-        tol = 2 * 60 * 1000; // +/- 2 minutes
-      } else if (unit.startsWith("h") || unit === "hr" || unit === "hrs") {
+        tol = Math.max(2 * 60 * 1000, Math.round(n * 0.25 * 60 * 1000)); // +/- 2min or 25%
+      } else if (unit === "hour") {
         ms = n * 60 * 60 * 1000;
-        tol = 15 * 60 * 1000; // +/- 15 minutes
-      } else if (unit.startsWith("day") || unit === "d") {
+        tol = Math.max(15 * 60 * 1000, Math.round(n * 0.15 * 60 * 60 * 1000)); // +/- 15min or 15%
+      } else if (unit === "day") {
         ms = n * 24 * 60 * 60 * 1000;
-        tol = 12 * 60 * 60 * 1000; // +/- 12 hours
-      } else {
-        return null;
+        tol = Math.max(6 * 60 * 60 * 1000, Math.round(n * 0.2 * 24 * 60 * 60 * 1000)); // +/- 6h or 20%
       }
+
       const targetTs = Date.now() - ms;
-      const label = `${n} ${unit.replace(/s$/,'')}${n>1?'s':''} ago`;
-      return { targetTs, toleranceMs: tol, label };
+      const label = `${n} ${unit}${n>1?'s':''} ago`;
+      return { targetTs, toleranceMs: tol, label, rawMatch: m[0] };
     }
 
-    /* Render notes
-       - respects settings.noteSort and settings.showTimestamps
-       - supports search query and d: time filter
-    */
+    /* Render notes with d: filter and search UI */
     function renderNotes() {
-      const rawQ = searchInput.value.trim();
+      const rawQ = (searchInput.value || "").trim();
       const dateFilter = parseDateFilter(rawQ);
 
-      // Build base list and apply Fuse search if needed
+      // Start with a shallow copy of allNotes
       let list = allNotes.slice();
 
-      // If there's a non-date query (strip d: token), run Fuse
+      // If there's a date filter, remove the matched token from the query for text search
       let qForFuse = rawQ;
-      if (dateFilter) {
-        // remove the matched d: token from the query for text search
-        qForFuse = rawQ.replace(/d:\s*[0-9]+\s*(min|mins|minute|minutes|m|hr|hrs|hour|hours|h|day|days|d)\b/i, "").trim();
+      if (dateFilter && dateFilter.rawMatch) {
+        qForFuse = rawQ.replace(dateFilter.rawMatch, "").trim();
       }
 
+      // If there's a text query left, run Fuse
       if (qForFuse && fuse) {
-        const results = fuse.search(qForFuse);
-        list = results.map(r => r.item);
+        try {
+          const results = fuse.search(qForFuse);
+          list = results.map(r => r.item);
+        } catch (e) {
+          console.warn("Fuse search failed:", e);
+        }
       }
+
+      // Debug: counts before date filter
+      const beforeCount = list.length;
 
       // If dateFilter present, filter list by timestamp proximity
       if (dateFilter) {
         const { targetTs, toleranceMs } = dateFilter;
         list = list.filter(n => {
-          const created = n.created || 0;
+          // defensive: coerce created to number if it's a string
+          const createdRaw = n.created;
+          const created = typeof createdRaw === "number" ? createdRaw : (Number(createdRaw) || 0);
           return Math.abs(created - targetTs) <= toleranceMs;
         });
       }
+
+      // Debug: counts after date filter
+      const afterCount = list.length;
+      console.debug(`renderNotes: beforeDateFilter=${beforeCount}, afterDateFilter=${afterCount}`, dateFilter);
 
       // Sort according to settings
       list.sort((a, b) => {
@@ -638,6 +685,7 @@
         return settings.noteSort === "asc" ? aT - bT : bT - aT;
       });
 
+      // Update UI
       notesContainer.innerHTML = "";
       noteCount.textContent = list.length ? `${list.length} note${list.length>1?"s":""}` : "";
       emptyState.classList.toggle("hidden", list.length > 0);
@@ -652,13 +700,15 @@
         clearBtn.title = "Clear date filter";
         clearBtn.innerHTML = "✕";
         clearBtn.onclick = () => {
-          searchInput.value = searchInput.value.replace(/d:\s*[0-9]+\s*(min|mins|minute|minutes|m|hr|hrs|hour|hours|h|day|days|d)\b/i, "").trim();
+          searchInput.value = searchInput.value.replace(dateFilter.rawMatch, "").trim();
           renderNotes();
+          searchInput.focus();
         };
         pill.appendChild(clearBtn);
         searchFilterContainer.appendChild(pill);
       }
 
+      // Render each note
       list.forEach(note => {
         const row = document.createElement("div");
         row.className = "flex items-start justify-between gap-3 px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700/80";
@@ -795,9 +845,22 @@
 
     /* Search input handling: re-render on input and on Enter */
     searchInput.addEventListener("input", () => renderNotes());
+
+    // Clear button behavior
+    searchClearBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      searchFilterContainer.innerHTML = "";
+      renderNotes();
+      searchInput.focus();
+    });
+
+    // When Enter is pressed while searching: focus + select input so backspace clears
     searchInput.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter") {
         ev.preventDefault();
+        // If there's text, select it so user can press Backspace to clear quickly
+        searchInput.focus();
+        searchInput.select();
         renderNotes();
       }
     });
