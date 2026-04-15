@@ -11,7 +11,7 @@
 <body class="min-h-screen text-slate-100">
 
   <!-- Toast container -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50"></div>
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
 
   <div class="max-w-6xl mx-auto px-6 py-6 space-y-6">
 
@@ -32,8 +32,12 @@
           <span id="userName" class="font-medium text-slate-100"></span>
           <span id="userEmail" class="text-slate-400"></span>
         </div>
+
+        <!-- Debug UID (visible on larger screens) -->
+        <div id="debugUid" class="hidden sm:block text-[11px] text-slate-500 ml-4"></div>
+
         <button id="avatarBtn" class="relative">
-          <img id="userAvatar" src="" alt="avatar" class="w-10 h-10 rounded-full border border-slate-500 shadow-md object-cover" />
+          <img id="userAvatar" src="" alt="avatar" class="header-avatar" />
           <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-slate-900"></span>
         </button>
         <button id="logoutBtn" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
@@ -101,7 +105,6 @@
     </div>
   </div>
 
-  <!-- Firebase + App Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -109,7 +112,7 @@
       getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, onSnapshot
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-    // YOUR PROVIDED CONFIG
+    /* Inserted Firebase config (provided) */
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -131,6 +134,7 @@
     const userAvatar = document.getElementById("userAvatar");
     const userNameEl = document.getElementById("userName");
     const userEmailEl = document.getElementById("userEmail");
+    const debugUidEl = document.getElementById("debugUid");
 
     const newNoteEl = document.getElementById("newNote");
     const addNoteBtn = document.getElementById("addNoteBtn");
@@ -150,8 +154,8 @@
     let fuse = null;
     let settings = { autoClear: true, confirmDelete: false };
 
-    /* Toast builder: title + subtitle + type */
-    function toast(title, subtitle = "", type = "info") {
+    /* Toast builder (title, subtitle, type, optional link) */
+    function createToast(title, subtitle = "", type = "info", link = null) {
       const el = document.createElement("div");
       const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
       el.className = `nv-toast nv-animate-in ${typeClass}`;
@@ -161,6 +165,7 @@
         <div class="nv-body">
           <div class="nv-title">${title}</div>
           <div class="nv-sub">${subtitle}</div>
+          ${link ? `<a href="${link}" target="_blank" rel="noopener">Create index</a>` : ""}
         </div>
       `;
       el.onclick = () => {
@@ -205,23 +210,11 @@
       return `${d} day${d > 1 ? "s" : ""} ago`;
     }
 
-    /* Gravatar fallback */
+    /* Gravatar fallback (simple hash) */
     function md5(s) {
-      // small md5 implementation for gravatar
-      function rotl(n,c){return (n<<c)|(n>>>(32-c));}
-      function cmn(q,a,b,x,s,t){a=(a+q+x+t)|0;return rotl(a,s)+b|0;}
-      function ff(a,b,c,d,x,s,t){return cmn((b&c)|((~b)&d),a,b,x,s,t);}
-      function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&(~d)),a,b,x,s,t);}
-      function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t);}
-      function ii(a,b,c,d,x,s,t){return cmn(c^(b|(~d)),a,b,x,s,t);}
-      function toBytes(str){
-        const out=[]; for(let i=0;i<str.length;i++) out.push(str.charCodeAt(i));
-        return out;
-      }
-      // Use a tiny external-free md5 is long; fallback to simple hash if needed
-      // For reliability, use a simple hash to generate identicon fallback URL
-      let h=0; for(let i=0;i<s.length;i++){h=(h<<5)-h+ s.charCodeAt(i); h|=0;}
-      return (h>>>0).toString(16).padStart(8,'0');
+      let h = 0;
+      for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+      return (h >>> 0).toString(16).padStart(8, '0');
     }
     function gravatarUrl(email) {
       const hash = md5((email||"").trim().toLowerCase());
@@ -292,10 +285,10 @@
         saveBtn.onclick = async () => {
           try {
             await updateDoc(doc(db, "notes", note.id), { text: textEl.textContent || "" });
-            toast("Note updated", "Saved to cloud", "success");
+            createToast("Note updated", "Saved to cloud", "success");
           } catch (e) {
             console.error("updateDoc error", e);
-            toast("Update failed", e.message || "Try again", "error");
+            createToast("Update failed", e.message || "Try again", "error");
           }
         };
 
@@ -305,10 +298,10 @@
           }
           try {
             await deleteDoc(doc(db, "notes", note.id));
-            toast("Note deleted", "Removed from cloud", "success");
+            createToast("Note deleted", "Removed from cloud", "success");
           } catch (e) {
             console.error("deleteDoc error", e);
-            toast("Delete failed", e.message || "Try again", "error");
+            createToast("Delete failed", e.message || "Try again", "error");
           }
         };
 
@@ -318,7 +311,7 @@
       });
     }
 
-    /* Subscribe notes */
+    /* Subscribe notes with index-aware error handling */
     function subscribeNotes(user) {
       const notesRef = collection(db, "notes");
       const qNotes = query(notesRef, where("userId", "==", user.uid), orderBy("created", "desc"));
@@ -339,7 +332,19 @@
         },
         (err) => {
           console.error("onSnapshot error:", err);
-          toast("Failed to load notes", err.message || "Check console", "error");
+          const msg = err && err.message ? err.message : "Failed to load notes";
+          // extract first http(s) link if present (Firestore provides index link)
+          let indexLink = null;
+          try {
+            const urlMatch = msg.match(/https?:\/\/[^\s)]+/);
+            if (urlMatch) indexLink = urlMatch[0];
+          } catch (e) { /* ignore */ }
+
+          if (indexLink) {
+            createToast("Failed to load notes", "Query requires a composite index. Click to create it.", "error", indexLink);
+          } else {
+            createToast("Failed to load notes", msg, "error");
+          }
         }
       );
     }
@@ -352,6 +357,8 @@
       }
       currentUser = user;
       setUserUI(user);
+      // show debug uid so you can confirm it matches Firestore documents
+      if (debugUidEl) { debugUidEl.classList.remove("hidden"); debugUidEl.textContent = `uid: ${user.uid}`; }
       loadSettings();
       subscribeNotes(user);
     });
@@ -359,7 +366,7 @@
     /* Add note */
     addNoteBtn.onclick = async () => {
       const text = newNoteEl.value.trim();
-      if (!text) return toast("Note empty", "Type something before adding", "warning");
+      if (!text) return createToast("Note empty", "Type something before adding", "warning");
       try {
         await addDoc(collection(db, "notes"), {
           userId: currentUser.uid,
@@ -367,11 +374,11 @@
           created: Date.now(),
           tags: []
         });
-        toast("Note added successfully ✨", "Your note has been saved to the cloud.", "success");
+        createToast("Note added successfully ✨", "Your note has been saved to the cloud.", "success");
         if (settings.autoClear) newNoteEl.value = "";
       } catch (e) {
         console.error("addDoc error", e);
-        toast("Failed to add note", e.message || "Try again", "error");
+        createToast("Failed to add note", e.message || "Try again", "error");
       }
     };
 
@@ -385,7 +392,7 @@
         window.location.href = "login.html";
       } catch (e) {
         console.error("signOut error", e);
-        toast("Logout failed", e.message || "Try again", "error");
+        createToast("Logout failed", e.message || "Try again", "error");
       }
     };
 
@@ -393,10 +400,10 @@
     avatarBtn.onclick = () => settingsOverlay.classList.remove("hidden");
     closeSettingsBtn.onclick = () => settingsOverlay.classList.add("hidden");
     settingsOverlay.onclick = (e) => { if (e.target === settingsOverlay) settingsOverlay.classList.add("hidden"); };
-    saveSettingsBtn.onclick = () => { saveSettings(); toast("Settings saved", "Preferences updated", "success"); settingsOverlay.classList.add("hidden"); };
+    saveSettingsBtn.onclick = () => { saveSettings(); createToast("Settings saved", "Preferences updated", "success"); settingsOverlay.classList.add("hidden"); };
 
-    /* Expose toast to console for debugging if needed */
-    window.NV_toast = toast;
+    /* Expose createToast for debugging */
+    window.NV_toast = createToast;
   </script>
 </body>
 </html>

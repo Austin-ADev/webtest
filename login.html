@@ -10,7 +10,7 @@
 <body class="min-h-screen flex items-center justify-center">
 
   <!-- Toast container -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 flex flex-col gap-3 z-50"></div>
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
 
   <main class="glass max-w-md w-full rounded-3xl p-8 shadow-2xl mx-4">
     <div class="flex flex-col items-center mb-6">
@@ -49,7 +49,6 @@
     </div>
   </main>
 
-  <!-- Firebase v12 (modular) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import {
@@ -62,7 +61,7 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-    // YOUR PROVIDED CONFIG
+    /* Inserted Firebase config (provided) */
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -86,15 +85,18 @@
     const githubBtn = document.getElementById("githubBtn");
     const toastContainer = document.getElementById("toastContainer");
 
-    /* Toast helper: title + subtitle + type */
-    function toast(title, subtitle = "", type = "info") {
+    /* Toast helper (title, subtitle, type) */
+    function createToast(title, subtitle = "", type = "info", link = null) {
       const el = document.createElement("div");
-      el.className = `nv-toast nv-animate-in ${type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error"}`;
+      const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
+      el.className = `nv-toast nv-animate-in ${typeClass}`;
+      const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
       el.innerHTML = `
-        <div class="nv-icon">${type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫"}</div>
+        <div class="nv-icon">${icon}</div>
         <div class="nv-body">
           <div class="nv-title">${title}</div>
           <div class="nv-sub">${subtitle}</div>
+          ${link ? `<a href="${link}" target="_blank" rel="noopener">Open link</a>` : ""}
         </div>
       `;
       el.onclick = () => {
@@ -104,7 +106,7 @@
       };
       toastContainer.appendChild(el);
       setTimeout(() => {
-        if (!el.classList.contains("nv-animate-out")) {
+        if (document.body.contains(el)) {
           el.classList.add("nv-animate-out");
           setTimeout(() => el.remove(), 220);
         }
@@ -118,50 +120,50 @@
     emailLoginBtn.onclick = async () => {
       const email = emailInput.value.trim();
       const pass = passwordInput.value.trim();
-      if (!email || !pass) return toast("Missing credentials", "Enter email and password", "warning");
+      if (!email || !pass) return createToast("Missing credentials", "Enter email and password", "warning");
       try {
         await signInWithEmailAndPassword(auth, email, pass);
-        toast("Welcome back", "Signing you in…", "success");
+        createToast("Welcome back", "Signing you in…", "success");
         window.location.href = "index.html";
       } catch (err) {
         console.error("Email login error:", err);
-        toast("Login failed", err.message || "Check credentials", "error");
+        createToast("Login failed", err.message || "Check credentials", "error");
       }
     };
 
     emailSignupBtn.onclick = async () => {
       const email = emailInput.value.trim();
       const pass = passwordInput.value.trim();
-      if (!email || !pass) return toast("Missing credentials", "Enter email and password", "warning");
+      if (!email || !pass) return createToast("Missing credentials", "Enter email and password", "warning");
       try {
         await createUserWithEmailAndPassword(auth, email, pass);
-        toast("Account created", "Welcome to NeonVault", "success");
+        createToast("Account created", "Welcome to NeonVault", "success");
         window.location.href = "index.html";
       } catch (err) {
         console.error("Signup error:", err);
-        toast("Signup failed", err.message || "Try again", "error");
+        createToast("Signup failed", err.message || "Try again", "error");
       }
     };
 
     googleBtn.onclick = async () => {
       try {
         await signInWithPopup(auth, googleProvider);
-        toast("Signed in with Google", "Welcome", "success");
+        createToast("Signed in with Google", "Welcome", "success");
         window.location.href = "index.html";
       } catch (err) {
         console.error("Google sign-in error:", err);
-        toast("Google sign-in failed", err.message || "Try again", "error");
+        createToast("Google sign-in failed", err.message || "Try again", "error");
       }
     };
 
     githubBtn.onclick = async () => {
       try {
         await signInWithPopup(auth, githubProvider);
-        toast("Signed in with GitHub", "Welcome", "success");
+        createToast("Signed in with GitHub", "Welcome", "success");
         window.location.href = "index.html";
       } catch (err) {
         console.error("GitHub sign-in error:", err);
-        toast("GitHub sign-in failed", err.message || "Try again", "error");
+        createToast("GitHub sign-in failed", err.message || "Try again", "error");
       }
     };
   </script>

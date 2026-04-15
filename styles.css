@@ -1,18 +1,20 @@
-/* styles.css — NeonVault custom styles */
+/* styles.css — NeonVault custom styles (glass, toasts, modal, utilities) */
 
 /* Theme variables */
 :root{
   --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-  --glass: rgba(15,23,42,0.92);
-  --glass-soft: rgba(15,23,42,0.82);
+  --glass: rgba(15,23,42,0.94);
+  --glass-soft: rgba(15,23,42,0.84);
   --border-strong: rgba(148,163,184,0.28);
   --border-soft: rgba(51,65,85,0.7);
   --accent: #6366f1;
+  --muted: #94a3b8;
 }
 
 /* Page */
 html,body{
   height:100%;
+  margin:0;
   background:var(--bg);
   color:#e6eef8;
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
@@ -32,24 +34,46 @@ html,body{
   border: 1px solid var(--border-soft);
 }
 
-/* Toasts: container handled in HTML; individual toast styles below */
+/* Header avatar */
+.header-avatar {
+  width:40px;
+  height:40px;
+  border-radius:999px;
+  object-fit:cover;
+  border:1px solid rgba(148,163,184,0.12);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Toast container (positioned in HTML) */
+#toastContainer {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:flex-end;
+  pointer-events:none;
+}
+
+/* Toast card */
 .nv-toast {
+  pointer-events:auto;
   display:flex;
   gap:12px;
   align-items:flex-start;
   padding:12px 14px;
   border-radius:12px;
-  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-  max-width:360px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  max-width:420px;
+  width:100%;
   cursor:pointer;
   transform-origin:right bottom;
   transition:transform .18s ease, opacity .18s ease;
   opacity:1;
+  overflow:hidden;
 }
 .nv-toast .nv-icon {
-  width:36px;
-  height:36px;
-  border-radius:8px;
+  width:40px;
+  height:40px;
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -59,26 +83,43 @@ html,body{
 .nv-toast .nv-body {
   display:flex;
   flex-direction:column;
-  gap:2px;
+  gap:4px;
+  min-width:0;
 }
 .nv-toast .nv-title {
-  font-weight:600;
+  font-weight:700;
   font-size:14px;
-  color:var(--nv-title, #fff);
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .nv-toast .nv-sub {
-  font-size:12px;
-  color:var(--nv-sub, #e6eef8);
-  opacity:.9;
+  font-size:13px;
+  color:rgba(230,238,248,0.95);
+  opacity:0.95;
+  line-height:1.15;
+  max-height:3.6em;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 /* Types */
-.nv-success { background: linear-gradient(180deg,#064e3b,#065f46); border:1px solid rgba(16,185,129,0.12); }
+.nv-success { background: linear-gradient(180deg,#065f46,#064e3b); border:1px solid rgba(16,185,129,0.12); }
 .nv-success .nv-icon { background: rgba(16,185,129,0.12); color:#bbf7d0; }
 .nv-warning { background: linear-gradient(180deg,#92400e,#b45309); border:1px solid rgba(245,158,11,0.12); }
 .nv-warning .nv-icon { background: rgba(245,158,11,0.12); color:#fde68a; }
 .nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
 .nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
+
+/* Link inside toast */
+.nv-toast a {
+  color: rgba(255,255,255,0.95);
+  text-decoration: underline;
+  font-size:12px;
+  margin-top:6px;
+  display:inline-block;
+}
 
 /* Animations */
 @keyframes nv-slide-in {
@@ -101,3 +142,9 @@ html,body{
 
 /* Small utilities */
 .nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .max-w-6xl { padding-left:20px; padding-right:20px; }
+  #toastContainer { right: 12px; left: auto; bottom: 12px; }
+}
