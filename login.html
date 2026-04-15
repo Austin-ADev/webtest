@@ -2,66 +2,125 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>NeonVault — Login</title>
+  <title>NeonVault — Sign in</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{
+      --bg: linear-gradient(180deg,#05060a 0%, #071026 60%, #020617 100%);
+      --card: rgba(10,14,22,0.72);
+      --glass: rgba(15,23,42,0.86);
+      --muted: #94a3b8;
+      --accent: #6366f1;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#e6eef8;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+    .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;}
+    .card{width:100%;max-width:520px;background:var(--card);backdrop-filter:blur(10px);border-radius:16px;padding:28px;border:1px solid rgba(148,163,184,0.06);box-shadow:0 10px 40px rgba(2,6,23,0.6);}
+    .neon-word { font-weight:700; font-size:28px; line-height:1; color:transparent; background: linear-gradient(90deg,#7dd3fc 0%,#c084fc 45%,#a78bfa 70%,#60a5fa 100%); -webkit-background-clip:text; background-clip:text; text-shadow:0 6px 24px rgba(99,102,241,0.06); }
+    .neon-tag { font-size:12px; color:rgba(230,238,248,0.72); margin-top:4px; }
+    .logo-row { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+    .subtitle { color:var(--muted); font-size:13px; margin-top:6px; }
+
+    /* Form */
+    .form-row { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+    input[type="email"], input[type="password"] {
+      width:100%; padding:12px 14px; border-radius:10px; background:rgba(7,11,18,0.6); border:1px solid rgba(148,163,184,0.06); color:#e6eef8; outline:none;
+    }
+    input::placeholder { color: rgba(230,238,248,0.45); }
+    .btn-primary { background: linear-gradient(90deg,#6366f1,#7c3aed); color:white; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600; }
+    .btn-ghost { background: transparent; color: #e6eef8; padding:10px 14px; border-radius:10px; border:1px solid rgba(148,163,184,0.06); cursor:pointer; }
+
+    .divider { display:flex; align-items:center; gap:12px; margin:18px 0; color:var(--muted); font-size:12px; }
+    .divider::before, .divider::after { content:""; flex:1; height:1px; background:rgba(148,163,184,0.04); border-radius:2px; }
+
+    /* Social buttons */
+    .social-grid { display:flex; gap:10px; flex-direction:column; }
+    .social-btn {
+      display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:600; border:1px solid rgba(148,163,184,0.06);
+    }
+    .social-google { background:white; color:#111827; }
+    .social-google svg { width:18px; height:18px; }
+    .social-github { background:linear-gradient(180deg,#0f1724,#0b1220); color:#e6eef8; display:flex; align-items:center; justify-content:flex-start; }
+    .social-github svg { width:18px; height:18px; fill:currentColor; }
+
+    .muted-link { color:var(--muted); font-size:13px; text-decoration:underline; cursor:pointer; }
+
+    /* small helpers */
+    .row-between { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .small { font-size:13px; color:var(--muted); }
+
+    @media (max-width:520px){
+      .card{padding:18px;}
+      .neon-word{font-size:22px;}
+    }
+  </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
+<body>
+  <div id="toastContainer" style="position:fixed;right:18px;bottom:18px;z-index:60;"></div>
 
-  <!-- Toast container -->
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
-
-  <main class="glass max-w-md w-full rounded-3xl p-8 shadow-2xl mx-4">
-    <div class="flex flex-col items-center mb-6">
-      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
-        <span class="text-2xl font-bold">NV</span>
+  <div class="center-wrap">
+    <div class="card" role="main" aria-labelledby="signin-heading">
+      <div class="logo-row">
+        <!-- TEXT-ONLY NeonVault wordmark -->
+        <div style="display:flex;flex-direction:column;">
+          <div class="neon-word" id="signin-heading">NeonVault</div>
+          <div class="neon-tag">Modern, synced notes in the cloud.</div>
+        </div>
       </div>
-      <h1 class="mt-4 text-2xl font-semibold tracking-tight text-slate-100">NeonVault</h1>
-      <p class="text-sm text-slate-400 mt-1 text-center">Modern, synced notes in the cloud.</p>
-    </div>
 
-    <div class="space-y-3 mb-4">
-      <input id="emailInput" type="email" placeholder="Email"
-             class="w-full px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-      <input id="passwordInput" type="password" placeholder="Password"
-             class="w-full px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-    </div>
+      <form id="loginForm" class="form-row" onsubmit="return false;">
+        <label class="small">Email</label>
+        <input id="email" type="email" placeholder="you@domain.com" autocomplete="email" required />
 
-    <div class="flex gap-3 mb-4">
-      <button id="emailLoginBtn" class="w-1/2 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-medium">Login</button>
-      <button id="emailSignupBtn" class="w-1/2 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 font-medium">Sign up</button>
-    </div>
+        <label class="small">Password</label>
+        <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
 
-    <div class="flex items-center my-4">
-      <div class="flex-1 h-px bg-slate-700/70"></div>
-      <span class="px-3 text-xs uppercase tracking-wide text-slate-500">or continue with</span>
-      <div class="flex-1 h-px bg-slate-700/70"></div>
-    </div>
+        <div class="row-between" style="margin-top:6px;">
+          <div class="small"><label><input id="remember" type="checkbox" style="margin-right:8px;">Remember me</label></div>
+          <button id="forgotBtn" class="muted-link" type="button">Forgot?</button>
+        </div>
 
-    <div class="space-y-3">
-      <button id="googleBtn" class="w-full py-2.5 rounded-xl bg-white text-slate-900 flex items-center justify-center gap-3">
-        <span class="text-lg">🟢</span><span>Continue with Google</span>
-      </button>
-      <button id="githubBtn" class="w-full py-2.5 rounded-xl bg-slate-900 text-slate-100 flex items-center justify-center gap-3 border border-slate-700">
-        <span class="text-lg">🐙</span><span>Continue with GitHub</span>
-      </button>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button id="loginBtn" class="btn-primary" type="button">Login</button>
+          <button id="signupBtn" class="btn-ghost" type="button">Sign up</button>
+        </div>
+      </form>
+
+      <div class="divider">OR CONTINUE WITH</div>
+
+      <div class="social-grid">
+        <!-- Google button (white, Google icon) -->
+        <button id="googleBtn" class="social-btn social-google" aria-label="Continue with Google" type="button">
+          <!-- Google SVG mark -->
+          <svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M533.5 278.4c0-17.4-1.6-34.1-4.6-50.4H272v95.4h146.9c-6.3 34.1-25.1 62.9-53.6 82.1v68.2h86.6c50.7-46.7 82.6-115.6 82.6-195.3z" fill="#4285F4"/>
+            <path d="M272 544.3c72.6 0 133.6-24.1 178.1-65.4l-86.6-68.2c-24.1 16.2-55 25.8-91.5 25.8-70.3 0-129.9-47.5-151.3-111.4H31.9v69.9C76.1 486.6 167.6 544.3 272 544.3z" fill="#34A853"/>
+            <path d="M120.7 325.1c-10.9-32.6-10.9-67.6 0-100.2V154.9H31.9c-39.6 78.9-39.6 171.3 0 250.2l88.8-79.9z" fill="#FBBC05"/>
+            <path d="M272 107.7c39.6 0 75.2 13.6 103.2 40.4l77.4-77.4C405.6 24.1 344.6 0 272 0 167.6 0 76.1 57.7 31.9 154.9l88.8 69.9C142.1 155.2 201.7 107.7 272 107.7z" fill="#EA4335"/>
+          </svg>
+          <span style="flex:1;text-align:left;">Continue with Google</span>
+        </button>
+
+        <!-- GitHub button (dark) -->
+        <button id="githubBtn" class="social-btn social-github" aria-label="Continue with GitHub" type="button">
+          <!-- Octocat SVG -->
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2 .37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          <span style="flex:1;text-align:left;">Continue with GitHub</span>
+        </button>
+      </div>
+
+      <div style="margin-top:16px;display:flex;justify-content:center;">
+        <div class="small">By continuing you agree to our <span class="muted-link">Terms</span> and <span class="muted-link">Privacy</span>.</div>
+      </div>
     </div>
-  </main>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-    import {
-      getAuth,
-      GoogleAuthProvider,
-      GithubAuthProvider,
-      signInWithPopup,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-    /* Inserted Firebase config (provided) */
     const firebaseConfig = {
       apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
       authDomain: "webtest-4943a.firebaseapp.com",
@@ -74,98 +133,93 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const googleProvider = new GoogleAuthProvider();
-    const githubProvider = new GithubAuthProvider();
 
-    const emailInput = document.getElementById("emailInput");
-    const passwordInput = document.getElementById("passwordInput");
-    const emailLoginBtn = document.getElementById("emailLoginBtn");
-    const emailSignupBtn = document.getElementById("emailSignupBtn");
-    const googleBtn = document.getElementById("googleBtn");
-    const githubBtn = document.getElementById("githubBtn");
-    const toastContainer = document.getElementById("toastContainer");
-
-    /* Toast helper (title, subtitle, type) */
-    function createToast(title, subtitle = "", type = "info", link = null) {
-      const el = document.createElement("div");
-      const typeClass = type === "success" ? "nv-success" : type === "warning" ? "nv-warning" : "nv-error";
-      el.className = `nv-toast nv-animate-in ${typeClass}`;
-      const icon = type === "success" ? "✨" : type === "warning" ? "⚠️" : "🚫";
-      el.innerHTML = `
-        <div class="nv-icon">${icon}</div>
-        <div class="nv-body">
-          <div class="nv-title">${title}</div>
-          <div class="nv-sub">${subtitle}</div>
-          ${link ? `<a href="${link}" target="_blank" rel="noopener">Open link</a>` : ""}
-        </div>
-      `;
-      el.onclick = () => {
-        el.classList.remove("nv-animate-in");
-        el.classList.add("nv-animate-out");
-        setTimeout(() => el.remove(), 220);
-      };
+    /* Simple toast for feedback */
+    const toastContainer = document.getElementById('toastContainer');
+    function toast(msg, type = 'info', ms = 4000) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.padding = '10px 14px';
+      el.style.borderRadius = '10px';
+      el.style.marginTop = '8px';
+      el.style.boxShadow = '0 8px 20px rgba(2,6,23,0.6)';
+      el.style.background = type === 'error' ? 'linear-gradient(90deg,#7f1d1d,#991b1b)' : 'linear-gradient(90deg,#065f46,#064e3b)';
+      el.style.color = '#fff';
       toastContainer.appendChild(el);
-      setTimeout(() => {
-        if (document.body.contains(el)) {
-          el.classList.add("nv-animate-out");
-          setTimeout(() => el.remove(), 220);
-        }
-      }, 4200);
+      setTimeout(()=> el.remove(), ms);
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = "index.html";
-    });
+    /* Elements */
+    const emailEl = document.getElementById('email');
+    const passEl = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const githubBtn = document.getElementById('githubBtn');
+    const forgotBtn = document.getElementById('forgotBtn');
 
-    emailLoginBtn.onclick = async () => {
-      const email = emailInput.value.trim();
-      const pass = passwordInput.value.trim();
-      if (!email || !pass) return createToast("Missing credentials", "Enter email and password", "warning");
+    /* Email/password sign-in */
+    loginBtn.addEventListener('click', async () => {
+      const email = emailEl.value.trim();
+      const pass = passEl.value;
+      if (!email || !pass) return toast('Enter email and password', 'error');
       try {
         await signInWithEmailAndPassword(auth, email, pass);
-        createToast("Welcome back", "Signing you in…", "success");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Email login error:", err);
-        createToast("Login failed", err.message || "Check credentials", "error");
+        toast('Signed in — redirecting...', 'success', 2000);
+        setTimeout(()=> window.location.href = 'index.html', 900);
+      } catch (e) {
+        console.error(e);
+        toast(e.message || 'Sign in failed', 'error', 6000);
       }
-    };
+    });
 
-    emailSignupBtn.onclick = async () => {
-      const email = emailInput.value.trim();
-      const pass = passwordInput.value.trim();
-      if (!email || !pass) return createToast("Missing credentials", "Enter email and password", "warning");
-      try {
-        await createUserWithEmailAndPassword(auth, email, pass);
-        createToast("Account created", "Welcome to NeonVault", "success");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Signup error:", err);
-        createToast("Signup failed", err.message || "Try again", "error");
-      }
-    };
+    /* Sign up button: redirect to sign up page or open modal */
+    signupBtn.addEventListener('click', () => {
+      window.location.href = 'signup.html';
+    });
 
-    googleBtn.onclick = async () => {
+    /* Google sign-in */
+    googleBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
       try {
-        await signInWithPopup(auth, googleProvider);
-        createToast("Signed in with Google", "Welcome", "success");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("Google sign-in error:", err);
-        createToast("Google sign-in failed", err.message || "Try again", "error");
+        await signInWithPopup(auth, provider);
+        toast('Signed in with Google', 'success', 2000);
+        setTimeout(()=> window.location.href = 'index.html', 700);
+      } catch (e) {
+        console.error(e);
+        toast(e.message || 'Google sign-in failed', 'error', 6000);
       }
-    };
+    });
 
-    githubBtn.onclick = async () => {
+    /* GitHub sign-in */
+    githubBtn.addEventListener('click', async () => {
+      const provider = new GithubAuthProvider();
       try {
-        await signInWithPopup(auth, githubProvider);
-        createToast("Signed in with GitHub", "Welcome", "success");
-        window.location.href = "index.html";
-      } catch (err) {
-        console.error("GitHub sign-in error:", err);
-        createToast("GitHub sign-in failed", err.message || "Try again", "error");
+        await signInWithPopup(auth, provider);
+        toast('Signed in with GitHub', 'success', 2000);
+        setTimeout(()=> window.location.href = 'index.html', 700);
+      } catch (e) {
+        console.error(e);
+        toast(e.message || 'GitHub sign-in failed', 'error', 6000);
       }
-    };
+    });
+
+    /* Forgot password (simple flow) */
+    forgotBtn.addEventListener('click', () => {
+      const email = emailEl.value.trim();
+      if (!email) return toast('Enter your email to reset password', 'error');
+      // For security and UX, you would call sendPasswordResetEmail here.
+      toast('Password reset link sent (demo)', 'success', 4000);
+    });
+
+    /* Optional: redirect if already signed in */
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // already signed in — go to app
+        window.location.href = 'index.html';
+      }
+    });
   </script>
 </body>
 </html>
