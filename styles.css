@@ -1,10 +1,13 @@
-/* styles.css — NeonVault (complete, strong light-theme first-class support, improved typography & profile environment) */
+/* styles.css — NeonVault (dark-theme defaults only; light-theme blocks removed)
+   This file contains the dark/default theme and all component styles.
+   Light-theme rules have been removed so you can keep light.css separate.
+*/
 
 /* Load Inter for readable UI (move to <head> as <link> for best perf if desired) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* =========================
-   Core variables (defaults)
+   Core variables (dark defaults)
    ========================= */
 :root{
   /* Typography */
@@ -39,31 +42,6 @@
   --nv-logout-bg: rgba(255,255,255,0.03);
   --nv-logout-bg-hover: rgba(99,102,241,0.08);
   --nv-logout-color: #fecaca;
-}
-
-/* =========================
-   Polished Light Theme
-   (primary target — toggled by body.nv-light-theme)
-   ========================= */
-body.nv-light-theme {
-  --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%);
-  --glass: rgba(250,250,252,0.94);
-  --glass-soft: rgba(247,248,250,0.98);
-  --border-strong: rgba(15,23,42,0.06);
-  --border-soft: rgba(15,23,42,0.04);
-  --accent: #4f46e5;            /* muted indigo */
-  --muted: #55606a;             /* comfortable secondary */
-  --text: #0f1724;              /* charcoal primary */
-  --text-primary: #0f1724;
-  --text-secondary: #55606a;
-  --surface-elev: rgba(2,6,23,0.03);
-
-  /* Toast palettes */
-  --toast-success-bg: linear-gradient(180deg,#0f5132,#0b3f2a);
-  --toast-warning-bg: linear-gradient(180deg,#7a4b0f,#9a5b12);
-  --toast-error-bg: linear-gradient(180deg,#7b1f1f,#8f2b2b);
-
-  color-scheme: light;
 }
 
 /* =========================
@@ -158,13 +136,6 @@ h3 { font-size: 1.05rem; }
   position: relative;
 }
 
-/* Light theme profile variant */
-body.nv-light-theme .header-profile {
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(79,70,229,0.06);
-  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
-}
-
 /* Avatar */
 .header-profile .profile-avatar {
   width:44px; height:44px; border-radius:10px; overflow:hidden; display:inline-grid; place-items:center; flex-shrink:0;
@@ -204,13 +175,6 @@ body.nv-light-theme .header-profile {
 .header-profile .logout-btn:hover { background: var(--nv-logout-bg-hover); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(99,102,241,0.06); }
 .header-profile .logout-btn:active { transform: translateY(0); box-shadow: none; }
 
-/* Light theme logout contrast */
-body.nv-light-theme .header-profile .logout-btn {
-  background: rgba(15,23,42,0.03);
-  color: #9b1f2a;
-  border: 1px solid rgba(15,23,42,0.04);
-}
-
 /* Profile dropdown actions (hidden by default) */
 .header-profile .profile-actions {
   display:none;
@@ -247,14 +211,6 @@ input, textarea, .btn-ghost {
 }
 input::placeholder, textarea::placeholder { color: rgba(230,238,248,0.45); }
 
-/* Light theme input tweaks */
-body.nv-light-theme input, body.nv-light-theme textarea, body.nv-light-theme .btn-ghost {
-  background: rgba(15,23,42,0.03);
-  color: var(--text);
-  border-color: var(--border-soft);
-}
-body.nv-light-theme input::placeholder, body.nv-light-theme textarea::placeholder { color: rgba(15,23,42,0.35); }
-
 /* Primary button */
 .btn-primary {
   background: linear-gradient(90deg,#6366f1,#7c3aed);
@@ -266,12 +222,10 @@ body.nv-light-theme input::placeholder, body.nv-light-theme textarea::placeholde
   box-shadow: 0 6px 18px rgba(99,102,241,0.08);
   font-family: var(--nv-font);
 }
-body.nv-light-theme .btn-primary { background: linear-gradient(90deg,#5b4ce6,#7a5df0); box-shadow: 0 6px 18px rgba(79,70,229,0.06); }
 
 /* Trash button */
 .trash-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; background: linear-gradient(180deg,#7f1d1d,#991b1b); color:#fff; border:1px solid rgba(239,68,68,0.12); box-shadow: 0 6px 14px rgba(0,0,0,0.45); }
 .trash-btn:hover { transform: translateY(-1px); }
-body.nv-light-theme .trash-btn { background: linear-gradient(180deg,#fff7f7,#fff3f3); color:#8b1f1f; border:1px solid rgba(139,31,31,0.06); box-shadow: 0 6px 12px rgba(2,6,23,0.02); }
 
 /* =========================
    Toasts & progress
@@ -290,7 +244,6 @@ body.nv-light-theme .trash-btn { background: linear-gradient(180deg,#fff7f7,#fff
    ========================= */
 .divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; }
 .divider::before, .divider::after { content:""; flex:1; height:1px; background:rgba(148,163,184,0.04); border-radius:2px; }
-body.nv-light-theme .divider::before, body.nv-light-theme .divider::after { background: rgba(15,23,42,0.06); }
 
 #notesContainer { overflow-y:auto; -webkit-overflow-scrolling:touch; max-height: calc(100vh - 320px); padding-right:6px; }
 #notesContainer::-webkit-scrollbar { width:8px; height:8px; }
@@ -298,7 +251,6 @@ body.nv-light-theme .divider::before, body.nv-light-theme .divider::after { back
 
 /* Focus outlines */
 :focus { outline: 2px solid rgba(99,102,241,0.18); outline-offset: 2px; }
-body.nv-light-theme :focus { outline: 3px solid rgba(79,70,229,0.12); outline-offset: 2px; }
 
 /* =========================
    Compact / density tweaks
@@ -308,74 +260,5 @@ body.nv-compact .glass, body.nv-compact .glass-soft { padding: calc(14px * var(-
 body.nv-compact .neon-word { font-size: calc(18px * var(--nv-density-scale)); }
 
 /* =========================
-   Strong light-theme overrides (last-resort)
-   - placed at end to ensure they win over other CSS (Tailwind, inline utilities)
-   - uses !important for the few properties that commonly get overridden
-   ========================= */
-body.nv-light-theme {
-  --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%) !important;
-  --glass: rgba(250,250,252,0.94) !important;
-  --glass-soft: rgba(247,248,250,0.98) !important;
-  --text: #0f1724 !important;
-  --text-primary: #0f1724 !important;
-  --text-secondary: #55606a !important;
-  --accent: #4f46e5 !important;
-  --surface-elev: rgba(2,6,23,0.03) !important;
-}
-
-/* Force card visuals in light mode */
-body.nv-light-theme .glass,
-body.nv-light-theme .glass-soft {
-  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,250,252,0.96)) !important;
-  border: 1px solid rgba(15,23,42,0.04) !important;
-  box-shadow: 0 8px 20px rgba(2,6,23,0.03) !important;
-  color: var(--text) !important;
-  border-radius: 12px !important;
-}
-
-/* Force note rows to readable surfaces */
-body.nv-light-theme #notesContainer > div > .flex-1,
-body.nv-light-theme .note-row,
-body.nv-light-theme .note-card {
-  background: rgba(245,246,248,0.92) !important;
-  border: 1px solid rgba(15,23,42,0.03) !important;
-  color: var(--text) !important;
-}
-
-/* Inputs/buttons forced */
-body.nv-light-theme input,
-body.nv-light-theme textarea,
-body.nv-light-theme .btn-ghost {
-  background: rgba(15,23,42,0.03) !important;
-  color: var(--text) !important;
-  border-color: rgba(15,23,42,0.04) !important;
-}
-
-/* Primary button forced */
-body.nv-light-theme .btn-primary {
-  background: linear-gradient(90deg,#5b4ce6,#7a5df0) !important;
-  color: #fff !important;
-  box-shadow: 0 6px 18px rgba(79,70,229,0.06) !important;
-}
-
-/* Profile area forced */
-body.nv-light-theme .header-profile {
-  background: rgba(255,255,255,0.92) !important;
-  border: 1px solid rgba(79,70,229,0.06) !important;
-  box-shadow: 0 6px 18px rgba(2,6,23,0.04) !important;
-  color: var(--text) !important;
-}
-
-/* Logout forced */
-body.nv-light-theme .header-profile .logout-btn {
-  background: rgba(15,23,42,0.03) !important;
-  color: #9b1f2a !important;
-  border: 1px solid rgba(15,23,42,0.04) !important;
-}
-
-/* Ensure inline backgrounds don't block variables */
-body.nv-light-theme .glass[style] { background: none !important; }
-
-/* =========================
-   End of file
+   End of dark/default theme
    ========================= */
