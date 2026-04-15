@@ -1,127 +1,57 @@
-/* styles.css — NeonVault (dark-theme defaults only; light-theme blocks removed)
-   This file contains the dark/default theme and all component styles.
-   Light-theme rules have been removed so you can keep light.css separate.
-*/
-
-/* Load Inter for readable UI (move to <head> as <link> for best perf if desired) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-/* =========================
-   Core variables (dark defaults)
-   ========================= */
-:root{
-  /* Typography */
-  --nv-font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  --nv-base-font-size: 15px;
-  --nv-line-height: 1.55;
-  --nv-heading-line-height: 1.2;
-  --nv-letter-spacing: -0.01em;
-
-  /* Density */
-  --nv-density-scale: 1;
-  --nv-base-font: calc(var(--nv-base-font-size) * var(--nv-density-scale));
-  --nv-base-padding: calc(16px * var(--nv-density-scale));
-  --nv-card-padding: calc(24px * var(--nv-density-scale));
-
-  /* Dark theme defaults (safe fallback) */
-  --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
-  --glass: rgba(15,23,42,0.94);
-  --glass-soft: rgba(15,23,42,0.84);
-  --border-strong: rgba(148,163,184,0.28);
-  --border-soft: rgba(51,65,85,0.7);
-  --accent: #6366f1;
-  --muted: #94a3b8;
-  --text: #e6eef8;
-  --text-primary: #e6eef8;
-  --text-secondary: rgba(230,238,248,0.72);
-  --surface-elev: rgba(2,6,23,0.35);
-
-  /* Profile area defaults */
-  --nv-profile-bg: rgba(255,255,255,0.03);
-  --nv-profile-border: rgba(255,255,255,0.04);
-  --nv-logout-bg: rgba(255,255,255,0.03);
-  --nv-logout-bg-hover: rgba(99,102,241,0.08);
-  --nv-logout-color: #fecaca;
-}
-
-/* =========================
-   Base layout & typography
-   ========================= */
-html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--nv-font);
-  font-size: var(--nv-base-font);
-  line-height: var(--nv-line-height);
-  letter-spacing: var(--nv-letter-spacing);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden; /* notes container scrolls */
-  -webkit-text-size-adjust: 100%;
-  box-sizing: border-box;
-}
-
-/* Global transitions & box-sizing */
+/* small restore and polish for dark theme */
 *,
 *::before,
-*::after { box-sizing: inherit; transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease, box-shadow .18s ease; }
+*::after { box-sizing: border-box; transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease, box-shadow .18s ease; }
 
-/* Headings */
-h1,h2,h3,h4 { margin: 0 0 8px 0; color: var(--text-primary); font-weight: 700; line-height: var(--nv-heading-line-height); }
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.25rem; }
-h3 { font-size: 1.05rem; }
-
-/* =========================
-   Wordmark & header
-   ========================= */
-.neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
-.neon-mark { width:44px; height:44px; border-radius:10px; display:inline-grid; place-items:center; font-weight:800; font-size:18px; color:transparent; background: linear-gradient(135deg,#7dd3fc 0%,#c084fc 50%,#60a5fa 100%); -webkit-background-clip:text; background-clip:text; text-shadow: 0 6px 18px rgba(99,102,241,0.06); }
-.neon-word { font-weight:700; font-size:1.05rem; color:transparent; background: linear-gradient(90deg,#7dd3fc 0%,#c084fc 45%,#a78bfa 70%,#60a5fa 100%); -webkit-background-clip:text; background-clip:text; }
-
-/* =========================
-   App shell & containers
-   ========================= */
-.app-shell { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-.main-container { flex:1 1 auto; overflow:hidden; }
-.container-wide { max-width:1400px; margin-left:auto; margin-right:auto; padding-left:28px; padding-right:28px; }
-
-/* =========================
-   Glass surfaces & cards
-   ========================= */
-.glass {
-  background: var(--glass);
-  backdrop-filter: blur(18px);
-  border: 1px solid var(--border-strong);
-  padding: var(--nv-card-padding);
-  color: var(--text);
-  box-shadow: 0 10px 30px var(--surface-elev);
-  border-radius: 12px;
+:root{
+  --nv-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --nv-base-font-size: 15px;
+  --nv-line-height: 1.55;
+  --nv-text: #e6eef8;
+  --nv-muted: #94a3b8;
 }
-.glass-soft {
-  background: var(--glass-soft);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-soft);
-  padding: var(--nv-card-padding);
-  color: var(--text);
-  box-shadow: 0 8px 22px rgba(2,6,23,0.22);
+
+/* base typography */
+html, body {
+  font-family: var(--nv-font);
+  font-size: var(--nv-base-font-size);
+  line-height: var(--nv-line-height);
+  color: var(--nv-text);
+}
+
+/* ensure glass cards have consistent padding and radius */
+.glass, .glass-soft {
+  padding: 24px;
   border-radius: 12px;
 }
 
-/* Note rows and cards */
+/* note rows readable spacing */
 .note-row, .note-card, #notesContainer > div > .flex-1 {
-  font-size: 0.98rem;
-  line-height: 1.5;
-  color: var(--text);
-  background: transparent;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
 }
 
-/* =========================
-   Profile environment & logout
-   ========================= */
-/* Header profile container */
+/* inputs and primary button */
+input, textarea, .btn-ghost {
+  background: rgba(255,255,255,0.02);
+  color: var(--nv-text);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--nv-font);
+}
+.btn-primary {
+  background: linear-gradient(90deg,#6366f1,#7c3aed);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.08);
+}
+
+/* profile environment (restore if missing) */
 .header-profile {
   display:inline-flex;
   align-items:center;
@@ -131,134 +61,17 @@ h3 { font-size: 1.05rem; }
   background: var(--nv-profile-bg);
   border: 1px solid var(--nv-profile-border);
   box-shadow: 0 6px 18px rgba(2,6,23,0.12);
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-  cursor: default;
-  position: relative;
 }
-
-/* Avatar */
-.header-profile .profile-avatar {
-  width:44px; height:44px; border-radius:10px; overflow:hidden; display:inline-grid; place-items:center; flex-shrink:0;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 6px 18px rgba(2,6,23,0.12);
-}
-.header-profile .profile-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-
-/* Meta */
-.header-profile .profile-meta { display:flex; flex-direction:column; gap:2px; min-width:0; }
-.header-profile .profile-name { font-weight:700; font-size:0.95rem; color: var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.header-profile .profile-email { font-weight:500; font-size:0.82rem; color: var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-/* Badge */
-.header-profile .profile-badge { margin-left:8px; padding:4px 8px; border-radius:999px; font-size:11px; background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(99,102,241,0.06)); color: #fff; align-self:center; }
-
-/* Hover micro-interaction */
-.header-profile:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(2,6,23,0.18); }
-
-/* Logout button (pill) */
+.header-profile .profile-meta { display:flex; flex-direction:column; gap:2px; }
+.header-profile .profile-name { font-weight:700; color:var(--nv-text); }
 .header-profile .logout-btn {
-  margin-left:12px;
-  padding:8px 10px;
-  border-radius:999px;
-  background: var(--nv-logout-bg);
-  color: var(--nv-logout-color);
-  font-weight:600;
-  font-size:0.86rem;
-  border: 1px solid rgba(255,255,255,0.04);
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  cursor:pointer;
-  transition: background .12s ease, transform .08s ease, box-shadow .12s ease;
-  box-shadow: none;
-}
-.header-profile .logout-btn:hover { background: var(--nv-logout-bg-hover); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(99,102,241,0.06); }
-.header-profile .logout-btn:active { transform: translateY(0); box-shadow: none; }
-
-/* Profile dropdown actions (hidden by default) */
-.header-profile .profile-actions {
-  display:none;
-  position:absolute;
-  right:12px;
-  top:56px;
-  min-width:200px;
-  background: var(--glass);
-  border:1px solid var(--border-strong);
-  border-radius:10px;
-  padding:8px;
-  box-shadow: 0 12px 30px rgba(2,6,23,0.28);
-  z-index:60;
-}
-.header-profile.open .profile-actions { display:block; }
-.header-profile .profile-actions .action { padding:8px 10px; border-radius:8px; color: var(--text); font-size:0.92rem; }
-.header-profile .profile-actions .action:hover { background: rgba(99,102,241,0.06); }
-
-/* Accessibility focus */
-.header-profile .logout-btn:focus, .header-profile:focus-within { outline: 3px solid rgba(99,102,241,0.12); outline-offset: 3px; }
-
-/* =========================
-   Inputs, buttons & controls
-   ========================= */
-input, textarea, .btn-ghost {
-  background: rgba(255,255,255,0.02);
-  color: var(--text);
-  border-color: var(--border-soft);
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-family: var(--nv-font);
-  font-size: 0.98rem;
-  line-height: 1.45;
-}
-input::placeholder, textarea::placeholder { color: rgba(230,238,248,0.45); }
-
-/* Primary button */
-.btn-primary {
-  background: linear-gradient(90deg,#6366f1,#7c3aed);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
-  box-shadow: 0 6px 18px rgba(99,102,241,0.08);
-  font-family: var(--nv-font);
+  margin-left:12px; padding:8px 10px; border-radius:999px; background: var(--nv-logout-bg); color: var(--nv-logout-color); border:1px solid rgba(255,255,255,0.04);
 }
 
-/* Trash button */
-.trash-btn { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; background: linear-gradient(180deg,#7f1d1d,#991b1b); color:#fff; border:1px solid rgba(239,68,68,0.12); box-shadow: 0 6px 14px rgba(0,0,0,0.45); }
-.trash-btn:hover { transform: translateY(-1px); }
-
-/* =========================
-   Toasts & progress
-   ========================= */
-.nv-toast { pointer-events:auto; display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:12px; box-shadow: 0 10px 30px rgba(2,6,23,0.18); max-width:460px; width:100%; cursor:pointer; transform-origin:right bottom; transition:transform .18s ease, opacity .18s ease; opacity:1; overflow:hidden; position:relative; }
-.nv-toast .nv-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:18px; }
-.nv-toast .nv-title { font-weight:700; font-size:0.98rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.nv-toast .nv-sub { font-size:0.92rem; color:rgba(230,238,248,0.9); line-height:1.2; }
-
-/* Toast progress */
-.nv-progress { position:absolute; left:0; right:0; bottom:0; height:4px; background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)); border-bottom-left-radius:12px; border-bottom-right-radius:12px; overflow:hidden; }
-.nv-progress > i { display:block; height:100%; width:100%; background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06)); transform-origin:left center; transform: scaleX(1); transition: transform linear; }
-
-/* =========================
-   Dividers, scrollbars, misc
-   ========================= */
-.divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; }
-.divider::before, .divider::after { content:""; flex:1; height:1px; background:rgba(148,163,184,0.04); border-radius:2px; }
-
-#notesContainer { overflow-y:auto; -webkit-overflow-scrolling:touch; max-height: calc(100vh - 320px); padding-right:6px; }
-#notesContainer::-webkit-scrollbar { width:8px; height:8px; }
-#notesContainer::-webkit-scrollbar-thumb { background: rgba(71,85,105,0.6); border-radius:999px; }
-
-/* Focus outlines */
+/* focus outlines */
 :focus { outline: 2px solid rgba(99,102,241,0.18); outline-offset: 2px; }
 
-/* =========================
-   Compact / density tweaks
-   ========================= */
-body.nv-compact { --nv-density-scale: 0.88; }
-body.nv-compact .glass, body.nv-compact .glass-soft { padding: calc(14px * var(--nv-density-scale)); }
-body.nv-compact .neon-word { font-size: calc(18px * var(--nv-density-scale)); }
-
-/* =========================
-   End of dark/default theme
-   ========================= */
+/* small responsive tweak for notes container */
+@media (max-width: 1200px) {
+  #notesContainer { max-height: calc(100vh - 360px); }
+}
