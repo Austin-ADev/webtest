@@ -7,7 +7,9 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%); }
+    body {
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+    }
     .glass {
       background: rgba(15,23,42,0.9);
       backdrop-filter: blur(18px);
@@ -17,6 +19,18 @@
       background: rgba(15,23,42,0.8);
       backdrop-filter: blur(14px);
       border: 1px solid rgba(51,65,85,0.8);
+    }
+    .toast {
+      animation: slideIn 0.35s ease forwards;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .toast-hide {
+      opacity: 0 !important;
+      transform: translateY(10px) scale(0.95) !important;
+      transition: all 0.25s ease;
     }
   </style>
 </head>
@@ -151,15 +165,15 @@
     } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
     // TODO: replace with your real config
-   const firebaseConfig = {
-  apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
-  authDomain: "webtest-4943a.firebaseapp.com",
-  projectId: "webtest-4943a",
-  storageBucket: "webtest-4943a.firebasestorage.app",
-  messagingSenderId: "84924124626",
-  appId: "1:84924124626:web:73098a19326ed1a4ec8c0b",
-  measurementId: "G-9MNX5MX0Z2"
-};
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID",
+      measurementId: "YOUR_MEASUREMENT_ID"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -194,16 +208,28 @@
 
     function toast(message, type = "info") {
       const div = document.createElement("div");
+      const colors = {
+        info: "bg-slate-800/90 text-slate-100",
+        success: "bg-emerald-500/90 text-white",
+        error: "bg-red-500/90 text-white"
+      };
       div.className =
-        "px-4 py-2 rounded-xl text-sm shadow-lg " +
-        (type === "error"
-          ? "bg-red-500/90 text-white"
-          : type === "success"
-          ? "bg-emerald-500/90 text-white"
-          : "bg-slate-800/90 text-slate-100");
+        `toast px-4 py-2 rounded-xl text-sm shadow-xl cursor-pointer ${colors[type]}`;
       div.textContent = message;
+
+      div.onclick = () => {
+        div.classList.add("toast-hide");
+        setTimeout(() => div.remove(), 250);
+      };
+
       toastContainer.appendChild(div);
-      setTimeout(() => div.remove(), 3000);
+
+      setTimeout(() => {
+        if (div.parentNode) {
+          div.classList.add("toast-hide");
+          setTimeout(() => div.remove(), 250);
+        }
+      }, 4000);
     }
 
     function loadSettings() {
@@ -235,24 +261,17 @@
       return `${d} day${d > 1 ? "s" : ""} ago`;
     }
 
-    // Simple MD5 for gravatar (minified-ish, small)
+    // Minimal MD5 for gravatar
     function md5cycle(x, k) {
       function cmn(q, a, b, x, s, t) {
         a = (a + q + x + t) | 0;
         return (((a << s) | (a >>> (32 - s))) + b) | 0;
       }
-      function ff(a, b, c, d, x, s, t) {
-        return cmn((b & c) | (~b & d), a, b, x, s, t);
-      }
-      function gg(a, b, c, d, x, s, t) {
-        return cmn((b & d) | (c & ~d), a, b, x, s, t);
-      }
-      function hh(a, b, c, d, x, s, t) {
-        return cmn(b ^ c ^ d, a, b, x, s, t);
-      }
-      function ii(a, b, c, d, x, s, t) {
-        return cmn(c ^ (b | ~d), a, b, x, s, t);
-      }
+      function ff(a, b, c, d, x, s, t) { return cmn((b & c) | (~b & d), a, b, x, s, t); }
+      function gg(a, b, c, d, x, s, t) { return cmn((b & d) | (c & ~d), a, b, x, s, t); }
+      function hh(a, b, c, d, x, s, t) { return cmn(b ^ c ^ d, a, b, x, s, t); }
+      function ii(a, b, c, d, x, s, t) { return cmn(c ^ (b | ~d), a, b, x, s, t); }
+
       let a = x[0], b = x[1], c = x[2], d = x[3];
 
       a = ff(a, b, c, d, k[0], 7, -680876936);
@@ -329,6 +348,18 @@
       x[3] = (x[3] + d) | 0;
     }
 
+    function md5blk(s) {
+      const md5blks = [];
+      for (let i = 0; i < 64; i += 4) {
+        md5blks[i >> 2] =
+          s.charCodeAt(i) +
+          (s.charCodeAt(i + 1) << 8) +
+          (s.charCodeAt(i + 2) << 16) +
+          (s.charCodeAt(i + 3) << 24);
+      }
+      return md5blks;
+    }
+
     function md51(s) {
       const n = s.length;
       const state = [1732584193, -271733879, -1732584194, 271733878];
@@ -349,18 +380,6 @@
       tail[14] = n * 8;
       md5cycle(state, tail);
       return state;
-    }
-
-    function md5blk(s) {
-      const md5blks = [];
-      for (let i = 0; i < 64; i += 4) {
-        md5blks[i >> 2] =
-          s.charCodeAt(i) +
-          (s.charCodeAt(i + 1) << 8) +
-          (s.charCodeAt(i + 2) << 16) +
-          (s.charCodeAt(i + 3) << 24);
-      }
-      return md5blks;
     }
 
     function rhex(n) {
@@ -424,8 +443,7 @@
         left.className = "flex-1";
 
         const textEl = document.createElement("div");
-        textEl.className =
-          "text-sm text-slate-100 outline-none";
+        textEl.className = "text-sm text-slate-100 outline-none";
         textEl.contentEditable = "true";
         textEl.textContent = note.text || "";
 
