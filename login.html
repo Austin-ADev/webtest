@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeonVault - Sign In</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .glass { background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(24px); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-zinc-950 to-slate-900 flex items-center justify-center p-6">
+  <div class="glass rounded-3xl p-12 w-full max-w-md">
+    <div class="text-center mb-10">
+      <h1 class="text-5xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">NeonVault</h1>
+      <p class="text-slate-400 mt-3">Sign in to access your notes</p>
+    </div>
+
+    <button onclick="signInWithProvider('github')" 
+      class="w-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 py-4 rounded-3xl flex items-center justify-center gap-3 mb-3 text-lg font-medium transition">
+      <i class="fab fa-github text-2xl"></i> Continue with GitHub
+    </button>
+
+    <button onclick="signInWithProvider('google')" 
+      class="w-full bg-white text-black hover:bg-gray-100 py-4 rounded-3xl flex items-center justify-center gap-3 mb-8 text-lg font-medium transition">
+      <i class="fab fa-google text-2xl"></i> Continue with Google
+    </button>
+
+    <div class="flex items-center gap-4 my-6">
+      <div class="flex-1 h-px bg-zinc-700"></div>
+      <span class="text-zinc-500 text-sm">OR</span>
+      <div class="flex-1 h-px bg-zinc-700"></div>
+    </div>
+
+    <input id="email" type="email" placeholder="you@email.com" class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl px-6 py-4 mb-4 focus:outline-none focus:border-blue-500 text-lg">
+    <input id="password" type="password" placeholder="Password" class="w-full bg-zinc-900 border border-zinc-700 rounded-3xl px-6 py-4 mb-8 focus:outline-none focus:border-blue-500 text-lg">
+
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="handleEmailAuth(true)" class="py-4 bg-blue-600 hover:bg-blue-700 rounded-3xl font-medium text-lg transition">Login</button>
+      <button onclick="handleEmailAuth(false)" class="py-4 bg-emerald-600 hover:bg-emerald-700 rounded-3xl font-medium text-lg transition">Sign Up</button>
+    </div>
+
+    <p id="message" class="text-center mt-6 text-red-400 text-sm min-h-[24px]"></p>
+  </div>
+
+  <script type="module">
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzVYrsnc8NAE-tr9XTEVbSeRY9GL2yHVg",
+      authDomain: "webtest-4943a.firebaseapp.com",
+      projectId: "webtest-4943a",
+      storageBucket: "webtest-4943a.firebasestorage.app",
+      messagingSenderId: "84924124626",
+      appId: "1:84924124626:web:73098a19326ed1a4ec8c0b"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => { if (user) location.href = 'index.html'; });
+
+    window.signInWithProvider = async (type) => {
+      const provider = type === 'github' ? new GithubAuthProvider() : new GoogleAuthProvider();
+      try { await signInWithPopup(auth, provider); } 
+      catch (e) { document.getElementById('message').textContent = e.message.replace('Firebase: ', ''); }
+    };
+
+    window.handleEmailAuth = async (isLogin) => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!email || !password) return document.getElementById('message').textContent = "Please fill all fields";
+
+      try {
+        if (isLogin) await signInWithEmailAndPassword(auth, email, password);
+        else await createUserWithEmailAndPassword(auth, email, password);
+        location.href = 'index.html';
+      } catch (err) {
+        document.getElementById('message').textContent = err.message.replace('Firebase: ', '');
+      }
+    };
+  </script>
+</body>
+</html>
