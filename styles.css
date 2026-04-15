@@ -1,8 +1,17 @@
-/* styles.css — NeonVault custom styles (final integrated, with improved light theme & density) */
+/* styles.css — NeonVault final (typography improved, Inter font, light theme tuned) */
+
+/* Load Inter from Google Fonts (optional: move to <head> as <link> for best performance) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
 
 /* Theme and density variables (defaults) */
 :root{
+  --nv-font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   --nv-density-scale: 1;
+  --nv-base-font-size: 15px;            /* slightly larger base for readability */
+  --nv-line-height: 1.55;               /* comfortable line height */
+  --nv-heading-line-height: 1.2;
+  --nv-letter-spacing: -0.01em;
+
   --bg: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
   --glass: rgba(15,23,42,0.94);
   --glass-soft: rgba(15,23,42,0.84);
@@ -13,7 +22,7 @@
   --text: #e6eef8;
 
   /* Density-derived variables (default) */
-  --nv-base-font: calc(14px * var(--nv-density-scale));
+  --nv-base-font: calc(var(--nv-base-font-size) * var(--nv-density-scale));
   --nv-base-padding: calc(16px * var(--nv-density-scale));
   --nv-card-padding: calc(24px * var(--nv-density-scale));
 }
@@ -44,16 +53,36 @@ html,body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+  font-family: var(--nv-font);
+  font-size: var(--nv-base-font);
+  line-height: var(--nv-line-height);
+  letter-spacing: var(--nv-letter-spacing);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   overflow:hidden; /* keep page fixed; notes container scrolls */
-  font-size: var(--nv-base-font);
+  -webkit-text-size-adjust:100%;
 }
+
+/* Accessibility: increase contrast for body text where needed */
+body { -webkit-font-smoothing:antialiased; }
+
+/* Headings and emphasis */
+h1, h2, h3, h4, h5 {
+  font-family: var(--nv-font);
+  font-weight: 700;
+  line-height: var(--nv-heading-line-height);
+  margin: 0 0 8px 0;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.05rem; }
 
 /* Smooth transitions for theme/density changes */
 * {
   transition: background-color .18s ease, color .18s ease, border-color .12s ease, padding .12s ease, box-shadow .18s ease;
+  box-sizing: border-box;
 }
 
 /* NeonVault wordmark (CSS) */
@@ -64,7 +93,6 @@ html,body{
   user-select:none;
   -webkit-user-select:none;
 }
-
 .neon-mark {
   width:44px;
   height:44px;
@@ -80,46 +108,27 @@ html,body{
   filter: drop-shadow(0 6px 18px rgba(99,102,241,0.12));
   box-shadow: 0 6px 18px rgba(2,6,23,0.45), inset 0 -6px 18px rgba(255,255,255,0.02);
 }
-
-/* Wordmark text */
 .neon-word {
   font-weight:700;
-  font-size:18px;
+  font-size:1.05rem;
   line-height:1;
   color:transparent;
   background: linear-gradient(90deg, #7dd3fc 0%, #c084fc 45%, #a78bfa 70%, #60a5fa 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,0.02),
-    0 6px 18px rgba(99,102,241,0.08),
-    0 12px 40px rgba(99,102,241,0.06);
-  letter-spacing: -0.02em;
+  text-shadow: 0 6px 18px rgba(99,102,241,0.06);
 }
 
 /* Tagline */
 .neon-tag {
-  font-size:11px;
-  color:rgba(230,238,248,0.7);
+  font-size:0.85rem;
+  color:rgba(230,238,248,0.75);
   margin-top:2px;
   display:block;
 }
 
 /* Compact mark for very small screens */
-.neon-compact {
-  display:none;
-  width:40px;
-  height:40px;
-  border-radius:10px;
-  background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.06));
-  align-items:center;
-  justify-content:center;
-  font-weight:800;
-  color:transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  background-image: linear-gradient(90deg,#7dd3fc,#c084fc);
-}
+.neon-compact { display:none; }
 
 /* Responsive swaps */
 @media (max-width: 720px) {
@@ -130,27 +139,11 @@ html,body{
 }
 
 /* App shell */
-.app-shell {
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+.app-shell { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
 /* Main container — WIDER */
-.main-container {
-  flex:1 1 auto;
-  overflow:hidden;
-}
-
-/* Wider max width: use more of the screen on large displays */
-.container-wide {
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 28px;
-  padding-right: 28px;
-}
+.main-container { flex:1 1 auto; overflow:hidden; }
+.container-wide { max-width: 1400px; margin-left:auto; margin-right:auto; padding-left:28px; padding-right:28px; }
 
 /* Glass surfaces */
 .glass{
@@ -159,7 +152,9 @@ html,body{
   border: 1px solid var(--border-strong);
   padding: var(--nv-card-padding);
   color: var(--text);
-  box-shadow: 0 10px 30px rgba(2,6,23,0.35);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.28);
+  border-radius: 12px;
+  font-size: 0.98rem;
 }
 .glass-soft{
   background:var(--glass-soft);
@@ -167,7 +162,15 @@ html,body{
   border: 1px solid var(--border-soft);
   padding: var(--nv-card-padding);
   color: var(--text);
-  box-shadow: 0 8px 22px rgba(2,6,23,0.28);
+  box-shadow: 0 8px 22px rgba(2,6,23,0.22);
+  border-radius: 12px;
+}
+
+/* Improve readability for note rows and lists */
+.note-row, .note-card, #notesContainer > div > .flex-1 {
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--text);
 }
 
 /* Header avatar */
@@ -177,20 +180,11 @@ html,body{
   border-radius:999px;
   object-fit:cover;
   border:1px solid rgba(148,163,184,0.12);
-  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.45);
 }
 
 /* Toast container */
-#toastContainer {
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  align-items:flex-end;
-  pointer-events:none;
-  width:460px;
-  max-width:calc(100% - 32px);
-  padding:0 8px;
-}
+#toastContainer { display:flex; flex-direction:column; gap:12px; align-items:flex-end; pointer-events:none; width:460px; max-width:calc(100% - 32px); padding:0 8px; }
 
 /* Toast card */
 .nv-toast {
@@ -200,7 +194,7 @@ html,body{
   align-items:flex-start;
   padding:12px 14px;
   border-radius:12px;
-  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.18);
   max-width:460px;
   width:100%;
   cursor:pointer;
@@ -210,69 +204,13 @@ html,body{
   overflow:hidden;
   position:relative;
 }
-.nv-toast .nv-icon {
-  width:40px;
-  height:40px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  font-size:18px;
-}
-.nv-toast .nv-body {
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  min-width:0;
-}
-.nv-toast .nv-title {
-  font-weight:700;
-  font-size:14px;
-  color:var(--text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.nv-toast .nv-sub {
-  font-size:13px;
-  color:rgba(230,238,248,0.95);
-  opacity:0.95;
-  line-height:1.15;
-  max-height:4.2em;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+.nv-toast .nv-title { font-weight:700; font-size:0.98rem; color:var(--text); }
+.nv-toast .nv-sub { font-size:0.92rem; color:rgba(230,238,248,0.9); }
 
-/* Toast progress bar */
-.nv-progress {
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:4px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
-  border-bottom-left-radius:12px;
-  border-bottom-right-radius:12px;
-  overflow:hidden;
-}
-.nv-progress > i {
-  display:block;
-  height:100%;
-  width:100%;
-  background: linear-gradient(90deg, rgba(255,255,255,0.28), rgba(255,255,255,0.06));
-  transform-origin:left center;
-  transform: scaleX(1);
-  transition: transform linear;
-}
-
-/* Toast types (default dark theme) */
+/* Toast types */
 .nv-success { background: linear-gradient(180deg,#065f46,#064e3b); border:1px solid rgba(16,185,129,0.12); }
-.nv-success .nv-icon { background: rgba(16,185,129,0.12); color:#bbf7d0; }
 .nv-warning { background: linear-gradient(180deg,#92400e,#b45309); border:1px solid rgba(245,158,11,0.12); }
-.nv-warning .nv-icon { background: rgba(245,158,11,0.12); color:#fde68a; }
 .nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
-.nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
 
 /* Light-theme toast overrides (softer) */
 body.nv-light-theme .nv-success { background: var(--toast-success-bg); border-color: rgba(16,185,129,0.08); }
@@ -280,12 +218,7 @@ body.nv-light-theme .nv-warning { background: var(--toast-warning-bg); border-co
 body.nv-light-theme .nv-error { background: var(--toast-error-bg); border-color: rgba(239,68,68,0.08); }
 
 /* Notes container: scroll only this area */
-#notesContainer {
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  max-height: calc(100vh - 320px);
-  padding-right:6px;
-}
+#notesContainer { overflow-y:auto; -webkit-overflow-scrolling:touch; max-height: calc(100vh - 320px); padding-right:6px; }
 
 /* Trash button */
 .trash-btn {
@@ -321,13 +254,8 @@ body.nv-light-theme .trash-btn {
 .nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
 
 /* Compact class tweaks */
-body.nv-compact .glass,
-body.nv-compact .glass-soft {
-  padding: calc(14px * var(--nv-density-scale));
-}
-body.nv-compact .neon-word {
-  font-size: calc(18px * var(--nv-density-scale));
-}
+body.nv-compact .glass, body.nv-compact .glass-soft { padding: calc(14px * var(--nv-density-scale)); }
+body.nv-compact .neon-word { font-size: calc(18px * var(--nv-density-scale)); }
 
 /* Inputs and buttons adapt to theme */
 input, textarea, .btn-ghost {
@@ -336,19 +264,19 @@ input, textarea, .btn-ghost {
   border-color: var(--border-soft);
   border-radius: 10px;
   padding: 10px 12px;
+  font-family: var(--nv-font);
+  font-size: 0.98rem;
+  line-height: 1.45;
 }
 input::placeholder, textarea::placeholder { color: rgba(230,238,248,0.45); }
 
 /* Light theme input/button tweaks */
-body.nv-light-theme input,
-body.nv-light-theme textarea,
-body.nv-light-theme .btn-ghost {
+body.nv-light-theme input, body.nv-light-theme textarea, body.nv-light-theme .btn-ghost {
   background: rgba(15,23,42,0.03);
   color: var(--text);
   border-color: var(--border-soft);
 }
-body.nv-light-theme input::placeholder,
-body.nv-light-theme textarea::placeholder {
+body.nv-light-theme input::placeholder, body.nv-light-theme textarea::placeholder {
   color: rgba(15,23,42,0.35);
 }
 
@@ -361,13 +289,14 @@ body.nv-light-theme textarea::placeholder {
   border: none;
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(99,102,241,0.08);
+  font-family: var(--nv-font);
 }
 body.nv-light-theme .btn-primary {
   background: linear-gradient(90deg,#5b4ce6,#7a5df0);
   box-shadow: 0 6px 18px rgba(79,70,229,0.06);
 }
 
-/* Divider style (used in login/search areas) */
+/* Divider style */
 .divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; }
 .divider::before, .divider::after { content:""; flex:1; height:1px; background:rgba(148,163,184,0.04); border-radius:2px; }
 body.nv-light-theme .divider::before, body.nv-light-theme .divider::after { background: rgba(15,23,42,0.06); }
@@ -390,88 +319,11 @@ body.nv-light-theme .neon-word { text-shadow: 0 6px 18px rgba(79,70,229,0.06); }
   #toastContainer { width: calc(100% - 28px); }
 }
 
-/* ---------------------------
-   SOFT LIGHT THEME OVERRIDES
-   (stronger selectors placed at end to ensure they win)
-   --------------------------- */
-
-/* Gentle page background and card tint */
-body.nv-light-theme {
-  --bg: linear-gradient(180deg,#fbfbfc 0%, #f7f8fa 45%, #f3f6f9 100%) !important;
-  --glass: rgba(250,250,252,0.94) !important;
-  --glass-soft: rgba(247,248,250,0.98) !important;
-  --text: #0f1724 !important;
-  --muted: #5b6770 !important;
-  --accent: #5b4ce6 !important;
-  --surface-elev: rgba(2,6,23,0.03) !important;
-}
-
-/* Card background and border: low contrast, subtle radius */
-body.nv-light-theme .glass,
-body.nv-light-theme .glass-soft {
+/* Strong light-theme overrides (last-resort) */
+body.nv-light-theme .glass, body.nv-light-theme .glass-soft {
   background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,250,252,0.96)) !important;
   border: 1px solid rgba(15,23,42,0.04) !important;
   box-shadow: 0 8px 20px rgba(2,6,23,0.03) !important;
   color: var(--text) !important;
   border-radius: 12px !important;
 }
-
-/* Note rows: subtle card color so text reads comfortably */
-body.nv-light-theme #notesContainer > div > .flex-1,
-body.nv-light-theme .note-row,
-body.nv-light-theme .note-card {
-  background: rgba(245,246,248,0.9) !important;
-  border: 1px solid rgba(15,23,42,0.03) !important;
-  color: var(--text) !important;
-}
-
-/* Inputs: soft fill and clear focus */
-body.nv-light-theme input,
-body.nv-light-theme textarea {
-  background: rgba(15,23,42,0.03) !important;
-  border: 1px solid rgba(15,23,42,0.04) !important;
-  color: var(--text) !important;
-  box-shadow: none !important;
-}
-body.nv-light-theme input:focus,
-body.nv-light-theme textarea:focus {
-  outline: 3px solid rgba(91,76,230,0.10) !important;
-  outline-offset: 2px !important;
-}
-
-/* Primary button: slightly softer gradient and smaller shadow */
-body.nv-light-theme .btn-primary {
-  background: linear-gradient(90deg,#5b4ce6 0%, #7a5df0 100%) !important;
-  box-shadow: 0 6px 14px rgba(91,76,230,0.06) !important;
-}
-
-/* Trash and destructive UI: muted, not screaming */
-body.nv-light-theme .trash-btn {
-  background: linear-gradient(180deg,#fff7f7,#fff3f3) !important;
-  color: #8b1f1f !important;
-  border: 1px solid rgba(139,31,31,0.06) !important;
-  box-shadow: 0 6px 12px rgba(2,6,23,0.02) !important;
-}
-
-/* Toasts: softer palettes */
-body.nv-light-theme .nv-success { background: linear-gradient(180deg,#0f5132,#0b3f2a) !important; }
-body.nv-light-theme .nv-warning { background: linear-gradient(180deg,#7a4b0f,#9a5b12) !important; }
-body.nv-light-theme .nv-error { background: linear-gradient(180deg,#7b1f1f,#8f2b2b) !important; }
-
-/* Tone down neon wordmark glow on light background */
-body.nv-light-theme .neon-word {
-  filter: none !important;
-  text-shadow: 0 6px 14px rgba(79,70,229,0.04) !important;
-}
-
-/* Reduce overall saturation of icons and svgs in light mode */
-body.nv-light-theme svg { opacity: 0.92 !important; filter: none !important; }
-
-/* Subtle divider color */
-body.nv-light-theme .divider::before,
-body.nv-light-theme .divider::after {
-  background: rgba(15,23,42,0.05) !important;
-}
-
-/* Make sure any inline backgrounds are reset so variables apply */
-body.nv-light-theme .glass[style] { background: none !important; }
