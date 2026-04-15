@@ -14,22 +14,22 @@
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50"></div>
 
   <div class="app-shell">
-    <div class="max-w-6xl mx-auto px-6 py-6 space-y-6 main-container">
+    <div class="container-wide max-w-full mx-auto px-6 py-6 space-y-6 main-container">
 
       <!-- Header -->
-      <header class="glass rounded-3xl px-5 py-4 flex items-center justify-between shadow-xl">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
-            <span class="text-lg font-bold">NV</span>
+      <header class="glass rounded-3xl px-6 py-4 flex items-center justify-between shadow-xl">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-fuchsia-500 to-cyan-400 flex items-center justify-center shadow-lg">
+            <span class="text-xl font-bold">NV</span>
           </div>
           <div>
-            <h1 class="text-lg font-semibold tracking-tight">NeonVault</h1>
-            <p class="text-xs text-slate-400">Modern, synced notes.</p>
+            <h1 class="text-xl font-semibold tracking-tight">NeonVault</h1>
+            <p class="text-sm text-slate-400">Modern, synced notes.</p>
           </div>
         </div>
 
         <div class="flex items-center gap-4">
-          <div class="hidden sm:flex flex-col items-end text-xs">
+          <div class="hidden lg:flex flex-col items-end text-sm">
             <span id="userName" class="font-medium text-slate-100"></span>
             <span id="userEmail" class="text-slate-400"></span>
           </div>
@@ -38,30 +38,30 @@
             <img id="userAvatar" src="" alt="avatar" class="header-avatar" />
             <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border border-slate-900"></span>
           </button>
-          <button id="logoutBtn" class="hidden sm:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
+          <button id="logoutBtn" class="hidden lg:inline-flex px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700">Logout</button>
         </div>
       </header>
 
       <!-- Top row -->
-      <section class="grid lg:grid-cols-[2fr,1.2fr] gap-4">
-        <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
+      <section class="grid lg:grid-cols-[2.2fr,1fr] gap-6">
+        <div class="glass-soft rounded-3xl p-5 shadow-lg space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-100">New note</h2>
             <span class="nv-badge bg-slate-900/60 text-slate-300 border border-slate-700/60">Private</span>
           </div>
-          <textarea id="newNote" placeholder="Capture a thought..." class="w-full min-h-[90px] px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <textarea id="newNote" placeholder="Capture a thought..." class="w-full min-h-[110px] px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
           <div class="flex justify-between items-center">
             <span class="text-xs text-slate-500">Synced to your account in real time.</span>
             <button id="addNoteBtn" class="px-4 py-2 rounded-2xl text-xs font-medium bg-indigo-500 hover:bg-indigo-400">Add note</button>
           </div>
         </div>
 
-        <div class="glass-soft rounded-3xl p-4 shadow-lg space-y-3">
+        <div class="glass-soft rounded-3xl p-5 shadow-lg space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-100">Search & Filters</h2>
             <span class="text-[10px] text-slate-500">Fuzzy search by content & time</span>
           </div>
-          <input id="searchInput" type="text" placeholder="Search notes..." class="w-full px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          <input id="searchInput" type="text" placeholder="Search notes..." class="w-full px-4 py-3 rounded-2xl bg-slate-900/70 border border-slate-700 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           <p class="text-xs text-slate-500">Powered by Fuse.js — type loosely, we’ll find it.</p>
         </div>
       </section>
@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <!-- Settings modal -->
+  <!-- Settings modal (unchanged) -->
   <div id="settingsOverlay" class="nv-overlay fixed inset-0 flex items-center justify-center z-40 hidden">
     <div class="glass-soft rounded-3xl w-full max-w-sm p-5 shadow-2xl">
       <div class="flex items-center justify-between mb-3">

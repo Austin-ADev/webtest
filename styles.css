@@ -1,4 +1,4 @@
-/* styles.css — NeonVault custom styles (glass, toasts, modal, utilities) */
+/* styles.css — NeonVault custom styles (wider layout) */
 
 /* Theme variables */
 :root{
@@ -20,10 +20,10 @@ html,body{
   font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
-  overflow:hidden; /* prevent whole-page scroll; notes container will scroll */
+  overflow:hidden; /* keep page fixed; notes container scrolls */
 }
 
-/* App shell: keeps header and top controls visible while notes scroll */
+/* App shell */
 .app-shell {
   height:100vh;
   display:flex;
@@ -31,10 +31,19 @@ html,body{
   overflow:hidden;
 }
 
-/* Main content area (centered) */
+/* Main container — WIDER */
 .main-container {
   flex:1 1 auto;
   overflow:hidden;
+}
+
+/* Wider max width: use more of the screen on large displays */
+.container-wide {
+  max-width: 1400px; /* increased from 6xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 28px;
+  padding-right: 28px;
 }
 
 /* Glass surfaces */
@@ -51,22 +60,22 @@ html,body{
 
 /* Header avatar */
 .header-avatar {
-  width:40px;
-  height:40px;
+  width:44px;
+  height:44px;
   border-radius:999px;
   object-fit:cover;
   border:1px solid rgba(148,163,184,0.12);
   box-shadow: 0 6px 18px rgba(2,6,23,0.6);
 }
 
-/* Toast container (positioned in HTML) */
+/* Toast container */
 #toastContainer {
   display:flex;
   flex-direction:column;
   gap:12px;
   align-items:flex-end;
   pointer-events:none;
-  width:420px;
+  width:460px;
   max-width:calc(100% - 32px);
   padding:0 8px;
 }
@@ -80,7 +89,7 @@ html,body{
   padding:12px 14px;
   border-radius:12px;
   box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-  max-width:420px;
+  max-width:460px;
   width:100%;
   cursor:pointer;
   transform-origin:right bottom;
@@ -123,7 +132,7 @@ html,body{
   text-overflow:ellipsis;
 }
 
-/* Toast progress bar (bottom) */
+/* Toast progress bar */
 .nv-progress {
   position:absolute;
   left:0;
@@ -153,20 +162,11 @@ html,body{
 .nv-error { background: linear-gradient(180deg,#7f1d1d,#991b1b); border:1px solid rgba(239,68,68,0.12); }
 .nv-error .nv-icon { background: rgba(239,68,68,0.12); color:#fecaca; }
 
-/* Link inside toast (we intentionally do not show index creation links) */
-.nv-toast a {
-  color: rgba(255,255,255,0.95);
-  text-decoration: underline;
-  font-size:12px;
-  margin-top:6px;
-  display:inline-block;
-}
-
 /* Notes container: scroll only this area */
 #notesContainer {
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  max-height: calc(100vh - 320px); /* keeps notes area within viewport; adjusts with header/top rows */
+  max-height: calc(100vh - 320px);
   padding-right:6px;
 }
 
@@ -175,8 +175,8 @@ html,body{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:36px;
-  height:36px;
+  width:40px;
+  height:40px;
   border-radius:10px;
   background: linear-gradient(180deg,#7f1d1d,#991b1b);
   color:#fff;
@@ -196,8 +196,12 @@ html,body{
 .nv-badge { border-radius:999px; padding:4px 8px; font-size:11px; letter-spacing:.02em; }
 
 /* Responsive tweaks */
-@media (max-width: 900px) {
-  .max-w-6xl { padding-left:20px; padding-right:20px; }
+@media (max-width: 1200px) {
+  .container-wide { max-width: 1100px; padding-left:20px; padding-right:20px; }
   #toastContainer { right: 12px; left: auto; bottom: 12px; width: calc(100% - 24px); }
   #notesContainer { max-height: calc(100vh - 360px); }
+}
+@media (max-width: 800px) {
+  .container-wide { padding-left:14px; padding-right:14px; }
+  #toastContainer { width: calc(100% - 28px); }
 }
