@@ -8,24 +8,9 @@
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
 
-  <!-- Full wordmark CSS (keeps only the full NeonVault wordmark) -->
+  <!-- Wordmark CSS: text-only NeonVault (no square mark) -->
   <style>
     .neon-wordmark { display:flex; align-items:center; gap:12px; user-select:none; -webkit-user-select:none; }
-    .neon-mark {
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      display:inline-grid;
-      place-items:center;
-      font-weight:800;
-      font-size:20px;
-      color:transparent;
-      background: linear-gradient(135deg, #7dd3fc 0%, #c084fc 50%, #60a5fa 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      filter: drop-shadow(0 8px 22px rgba(99,102,241,0.12));
-      box-shadow: 0 6px 18px rgba(2,6,23,0.45), inset 0 -6px 18px rgba(255,255,255,0.02);
-    }
     .neon-word {
       font-weight:700;
       font-size:20px;
@@ -47,9 +32,8 @@
       display:block;
     }
 
-    /* Ensure the wordmark scales down gracefully on small screens */
+    /* Scale down on small screens */
     @media (max-width: 640px) {
-      .neon-mark { width:44px; height:44px; font-size:16px; }
       .neon-word { font-size:16px; }
       .neon-tag { display:none; }
     }
@@ -66,14 +50,11 @@
       <!-- Header -->
       <header class="glass rounded-3xl px-6 py-4 flex items-center justify-between shadow-xl">
         <div class="flex items-center gap-4">
-          <!-- FULL wordmark only -->
+          <!-- TEXT-ONLY wordmark -->
           <div class="neon-wordmark" aria-hidden="false" role="img" title="NeonVault">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="neon-mark" aria-hidden="true">NV</div>
-              <div style="display:flex;flex-direction:column;line-height:1;">
-                <span class="neon-word">NeonVault</span>
-                <span class="neon-tag">Modern, synced notes.</span>
-              </div>
+            <div style="display:flex;flex-direction:column;line-height:1;">
+              <span class="neon-word">NeonVault</span>
+              <span class="neon-tag">Modern, synced notes.</span>
             </div>
           </div>
         </div>
